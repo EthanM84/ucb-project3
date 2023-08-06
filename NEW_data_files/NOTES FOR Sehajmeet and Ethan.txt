@@ -1,0 +1,28 @@
+NOTES FOR Sehajmeet and Ethan:
+
+The revised spreadsheets are based on the most current data downloaded from the US Bureau of Labor Statistics.  I have crunched all the numbers so that Joy and I would have a working set of data with which to complete our assigned section(s) of the project.  When cleaning and formatting the two working datasets, please do your best to use the same column headers found on the [2] primary files in this folder. 
+
+Remember, the goal here is to recreate the two working datasets:
+1) automation_data_by_state_2
+2) occupation_salary_2
+
+by using the provided file, Automation_Probability_Data_2.csv, together with data scraped from the US Bureau of Labor Statistics using Flask API.
+
+Note:  The similarly named files in the main folder were originally provided to serve as a template for creating the new dataset.  Now that I have updated the data to include the latest job data, please reference the files in the "NEW_data files" folder as the preferred template for the project.  Joy and I will be writing our code from the new data and we know that integration will be much easier if we're all working will data that is uniformly formatted.  
+
+-------------------------
+
+Please be aware that I have edited the Automation_Probability_Data.csv file to agree with the web scraped dataset as much as possible.  This should make your job significantly easier when cleaning and then merging the downloaded data with the Automation file.
+
+When formatting the scraped data, please remember to:
+
+1) filter out all records with O_GROUP = "total"  (same as OCC_TITLE =  "All Occupations")
+2) filter out all records with O_GROUP = "major" (these are summary titles)
+
+This will effectively eliminate the duplication issue which I hinted on Slack.
+
+-----------------------
+
+
+
+
