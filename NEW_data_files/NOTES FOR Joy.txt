@@ -1,0 +1,17 @@
+NOTES FOR Joy:
+
+The revised spreadsheets are based on the most current data downloaded from the US Bureau of Labor Statistics.  I have crunched all the numbers so that you and I would have a working set of data with which to complete our assigned section(s) of the project.  We will need to revise the code to allow for integration with the web scraped dataset but our analysis and associated visualizations will remain unchanged.
+
+Just import the two working files:
+
+1) automation_data_by_state_2
+2) occupation_salary_2
+
+and use this data when writing your code.
+
+I will attempt to incorporate Leaflet in my section.  You may want to incorporate some sort of user interface (i.e. dropdown menu) in your section to ensure that we are fully compliant with the project requirements.  
+
+Note:  We also need to figure out how to incorporate one JavaScript library that we "did not review in class".  Fun!  
+
+Good luck!!
+
