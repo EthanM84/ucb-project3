@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Job Automation</title>
+    <title>Job Automation Data</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Scraped Data</h1>
-        <div id="scraped-data">Loading data...</div> <!-- Placeholder text while data is being fetched -->
-
-        <div class="dropdown">
-            <button onclick="toggleDropdown()">Select an option</button>
-            <ul id="dropdown-menu">
-                <li><a href="#">Option 1</a></li>
-                <li><a href="#">Option 2</a></li>
-                <li><a href="#">Option 3</a></li>
-            </ul>
-
-        </div>
+        <h1>Job Automation Data</h1>
+        <table id="scraped-data">
+            <thead>
+                <tr>
+                    <th>Occupation Title</th>
+                    <th>Employment RSE</th>
+                    <th>Median Hourly Wage</th>
+                    <th>Mean Hourly Wage</th>
+                    <th>Annual Mean Wage</th>
+                    <th>Mean Wage RSE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data rows will be added here dynamically using JavaScript -->
+            </tbody>
+        </table>
     </div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
