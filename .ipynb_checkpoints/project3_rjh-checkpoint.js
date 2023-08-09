@@ -21,27 +21,67 @@ Promise.all([
         'Occupation': row['OCC_TITLE'],
         'Total Employed': row['TOT_EMP'],
         'Mean Salary': row['A_MEAN']}));
-    
-    // Rename columns in Table 2 for readability
-    autoData = autoData.map(row => ({
-        ...row,
-        'OCC_Code': row['ï»¿SOC']}));
-    
+       
     // Merge tables on 'Occupation'
-    let tableMerge = autoData.map(autoRow => ({
-        ...autoRow,
-        ...occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation'])}));
-    
-    // Drop superfluous columns
-    let tableMergeClean = tableMerge.map(row => {
-        delete row['OCC_CODE'];
-        delete row['OCC_GROUP'];
-        delete row['District of Columbia'];
-        delete row['Guam'];
-        delete row['Puerto Rico'];
-        delete row['Virgin Islands'];
-        return row;});
-    
+    let tableMerge = autoData.map(autoRow => {
+        let occRow = occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation']);
+        return {
+            'Occupation': autoRow['Occupation'],
+            'Probability': autoRow['Probability'],
+            'Alabama': autoRow['Alabama'],
+            'Alaska': autoRow['Alaska'],
+            'Arizona': autoRow['Arizona'],
+            'Arkansas': autoRow['Arkansas'],
+            'California': autoRow['California'],
+            'Colorado': autoRow['Colorado'],
+            'Connecticut': autoRow['Connecticut'],
+            'Delaware': autoRow['Delaware'],
+            'Florida': autoRow['Florida'],
+            'Georgia': autoRow['Georgia'],
+            'Hawaii': autoRow['Hawaii'],
+            'Idaho': autoRow['Idaho'],
+            'Illinois': autoRow['Illinois'],
+            'Indiana': autoRow['Indiana'],
+            'Iowa': autoRow['Iowa'],
+            'Kansas': autoRow['Kansas'],
+            'Kentucky': autoRow['Kentucky'],
+            'Louisiana': autoRow['Louisiana'],
+            'Maine': autoRow['Maine'],
+            'Maryland': autoRow['Maryland'],
+            'Massachusetts': autoRow['Massachusetts'],
+            'Michigan': autoRow['Michigan'],
+            'Minnesota': autoRow['Minnesota'],
+            'Mississippi': autoRow['Mississippi'],
+            'Missouri': autoRow['Missouri'],
+            'Montana': autoRow['Montana'],
+            'Nebraska': autoRow['Nebraska'],
+            'Nevada': autoRow['Nevada'],
+            'New Hampshire': autoRow['New Hampshire'],
+            'New Jersey': autoRow['New Jersey'],
+            'New Mexico': autoRow['New Mexico'],
+            'New York': autoRow['New York'],
+            'North Carolina': autoRow['North Carolina'],
+            'North Dakota': autoRow['North Dakota'],
+            'Ohio': autoRow['Ohio'],
+            'Oklahoma': autoRow['Oklahoma'],
+            'Oregon': autoRow['Oregon'],
+            'Pennsylvania': autoRow['Pennsylvania'],
+            'Rhode Island': autoRow['Rhode Island'],
+            'South Carolina': autoRow['South Carolina'],
+            'South Dakota': autoRow['South Dakota'],
+            'Tennessee': autoRow['Tennessee'],
+            'Texas': autoRow['Texas'],
+            'Utah': autoRow['Utah'],
+            'Vermont': autoRow['Vermont'],
+            'Virginia': autoRow['Virginia'],
+            'Washington': autoRow['Washington'],
+            'West Virginia': autoRow['West Virginia'],
+            'Wisconsin': autoRow['Wisconsin'],
+            'Wyoming': autoRow['Wyoming'],
+            'Total Employed': occRow['Total Employed'],
+            'Mean Salary': occRow['Mean Salary']};
+});
+        
     // Convert "Mean Salary" and "Probability" columns to numeric
     tableMergeClean = tableMergeClean.map(row => ({
         ...row,
@@ -55,7 +95,7 @@ Promise.all([
     // Create a new array with Probability >= 0.80
     let above80 = tableMergeClean.filter(row => row['Probability'] >= 0.80);
 
-    // Eliminate unnecessary columns
+    // HELP >> Eliminate unnecessary columns -OR- specify columns to include?
     let plotByState = above80.map(row => ({
         ...row,
         'OCC_Code': undefined,
