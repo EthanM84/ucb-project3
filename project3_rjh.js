@@ -1,103 +1,135 @@
-(async () => {
-    
-    // Import data from two .csv files
-    Promise.all([
-        fetch('NEW_data_files/occupation_salary_2.csv').then(response => response.text()),
-        fetch('NEW_data_files/automation_data_by_state_2.csv').then(response => response.text())
+// Import data from two .csv files
+Promise.all([
+    fetch('NEW_data_files/occupation_salary_2.csv').then(response => response.text()),
+    fetch('NEW_data_files/automation_data_by_state_2.csv').then(response => response.text())
 ]).then(([occSalaryCSV, autoDataCSV]) => {
-        // Parse CSV data
-        let parseCSV = csv => {
-            let rows = csv.split('\n');
-            let header = rows[0].split(',');
-            let data = rows.slice(1).map(row => row.split(','));
-            return data.map(row => Object.fromEntries(row.map((cell, index) => [header[index], cell])));};
+    // Parse CSV data
+    let parseCSV = csv => {
+        let rows = csv.split('\n');
+        let header = rows[0].split(',');
+        let data = rows.slice(1).map(row => row.split(','));
+        return data.map(row => Object.fromEntries(row.map((cell, index) => [header[index], cell])));};
 
-        // Assign variable to Table 1
-        let occSalary = parseCSV(occSalaryCSV);
-        // Assign variable to Table 2
-        let autoData = parseCSV(autoDataCSV);
+    // Assign variable to Table 1
+    let occSalary = parseCSV(occSalaryCSV);
+    // Assign variable to Table 2
+    let autoData = parseCSV(autoDataCSV);
 
-        // Rename columns in Table 1 for merge prep
-        occSalary = occSalary.map(row => ({
-            ...row,
-            'Occupation': row['OCC_TITLE'],
-            'Total Employed': row['TOT_EMP'],
-            'Mean Salary': row['A_MEAN']}));
+    // Rename columns in Table 1 for merge prep
+    occSalary = occSalary.map(row => ({
+        ...row,
+        'Occupation': row['OCC_TITLE'],
+        'Total Employed': row['TOT_EMP'],
+        'Mean Salary': row['A_MEAN']}));
        
-        // Merge tables on 'Occupation'
-        let tableMerge = autoData.map(autoRow => {
-            let occRow = occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation']);
-            return {
-                'Occupation': autoRow['Occupation'],
-                'Probability': autoRow['Probability'],
-                'Alabama': autoRow['Alabama'],
-                'Alaska': autoRow['Alaska'],
-                'Arizona': autoRow['Arizona'],
-                'Arkansas': autoRow['Arkansas'],
-                'California': autoRow['California'],
-                'Colorado': autoRow['Colorado'],
-                'Connecticut': autoRow['Connecticut'],
-                'Delaware': autoRow['Delaware'],
-                'Florida': autoRow['Florida'],
-                'Georgia': autoRow['Georgia'],
-                'Hawaii': autoRow['Hawaii'],
-                'Idaho': autoRow['Idaho'],
-                'Illinois': autoRow['Illinois'],
-                'Indiana': autoRow['Indiana'],
-                'Iowa': autoRow['Iowa'],
-                'Kansas': autoRow['Kansas'],
-                'Kentucky': autoRow['Kentucky'],
-                'Louisiana': autoRow['Louisiana'],
-                'Maine': autoRow['Maine'],
-                'Maryland': autoRow['Maryland'],
-                'Massachusetts': autoRow['Massachusetts'],
-                'Michigan': autoRow['Michigan'],
-                'Minnesota': autoRow['Minnesota'],
-                'Mississippi': autoRow['Mississippi'],
-                'Missouri': autoRow['Missouri'],
-                'Montana': autoRow['Montana'],
-                'Nebraska': autoRow['Nebraska'],
-                'Nevada': autoRow['Nevada'],
-                'New Hampshire': autoRow['New Hampshire'],
-                'New Jersey': autoRow['New Jersey'],
-                'New Mexico': autoRow['New Mexico'],
-                'New York': autoRow['New York'],
-                'North Carolina': autoRow['North Carolina'],
-                'North Dakota': autoRow['North Dakota'],
-                'Ohio': autoRow['Ohio'],
-                'Oklahoma': autoRow['Oklahoma'],
-                'Oregon': autoRow['Oregon'],
-                'Pennsylvania': autoRow['Pennsylvania'],
-                'Rhode Island': autoRow['Rhode Island'],
-                'South Carolina': autoRow['South Carolina'],
-                'South Dakota': autoRow['South Dakota'],
-                'Tennessee': autoRow['Tennessee'],
-                'Texas': autoRow['Texas'],
-                'Utah': autoRow['Utah'],
-                'Vermont': autoRow['Vermont'],
-                'Virginia': autoRow['Virginia'],
-                'Washington': autoRow['Washington'],
-                'West Virginia': autoRow['West Virginia'],
-                'Wisconsin': autoRow['Wisconsin'],
-                'Wyoming': autoRow['Wyoming'],
-                'Total Employed': occRow['Total Employed'],
-                'Mean Salary': occRow['Mean Salary']};
-        });
+    // Merge tables on 'Occupation'
+    let tableMerge = autoData.map(autoRow => {
+        let occRow = occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation']);
+        return {
+            'Occupation': autoRow['Occupation'],
+            'Probability': autoRow['Probability'],
+            'Alabama': autoRow['Alabama'],
+            'Alaska': autoRow['Alaska'],
+            'Arizona': autoRow['Arizona'],
+            'Arkansas': autoRow['Arkansas'],
+            'California': autoRow['California'],
+            'Colorado': autoRow['Colorado'],
+            'Connecticut': autoRow['Connecticut'],
+            'Delaware': autoRow['Delaware'],
+            'Florida': autoRow['Florida'],
+            'Georgia': autoRow['Georgia'],
+            'Hawaii': autoRow['Hawaii'],
+            'Idaho': autoRow['Idaho'],
+            'Illinois': autoRow['Illinois'],
+            'Indiana': autoRow['Indiana'],
+            'Iowa': autoRow['Iowa'],
+            'Kansas': autoRow['Kansas'],
+            'Kentucky': autoRow['Kentucky'],
+            'Louisiana': autoRow['Louisiana'],
+            'Maine': autoRow['Maine'],
+            'Maryland': autoRow['Maryland'],
+            'Massachusetts': autoRow['Massachusetts'],
+            'Michigan': autoRow['Michigan'],
+            'Minnesota': autoRow['Minnesota'],
+            'Mississippi': autoRow['Mississippi'],
+            'Missouri': autoRow['Missouri'],
+            'Montana': autoRow['Montana'],
+            'Nebraska': autoRow['Nebraska'],
+            'Nevada': autoRow['Nevada'],
+            'New Hampshire': autoRow['New Hampshire'],
+            'New Jersey': autoRow['New Jersey'],
+            'New Mexico': autoRow['New Mexico'],
+            'New York': autoRow['New York'],
+            'North Carolina': autoRow['North Carolina'],
+            'North Dakota': autoRow['North Dakota'],
+            'Ohio': autoRow['Ohio'],
+            'Oklahoma': autoRow['Oklahoma'],
+            'Oregon': autoRow['Oregon'],
+            'Pennsylvania': autoRow['Pennsylvania'],
+            'Rhode Island': autoRow['Rhode Island'],
+            'South Carolina': autoRow['South Carolina'],
+            'South Dakota': autoRow['South Dakota'],
+            'Tennessee': autoRow['Tennessee'],
+            'Texas': autoRow['Texas'],
+            'Utah': autoRow['Utah'],
+            'Vermont': autoRow['Vermont'],
+            'Virginia': autoRow['Virginia'],
+            'Washington': autoRow['Washington'],
+            'West Virginia': autoRow['West Virginia'],
+            'Wisconsin': autoRow['Wisconsin'],
+            'Wyoming': autoRow['Wyoming'],
+            'Total Employed': occRow['Total Employed'],
+            'Mean Salary': occRow['Mean Salary']};
+    });
         
-        // Convert "Mean Salary" and "Probability" columns to numeric
-        tableMergeClean = tableMergeClean.map(row => ({
-            ...row,
-            'Mean Salary': parseFloat(row['Mean Salary']),
-            'Probability': parseFloat(row['Probability'])
-        }));
+    // Convert "Mean Salary" and "Probability" columns to numeric
+    tableMergeClean = tableMergeClean.map(row => ({
+        ...row,
+        'Mean Salary': parseFloat(row['Mean Salary']),
+        'Probability': parseFloat(row['Probability'])
+    }));
 
-        // Round "Mean Salary" to the nearest whole dollar amount
-        tableMergeClean.forEach(row => {
-        row['Mean Salary'] = Math.round(row['Mean Salary']);
-        });
+    // Round "Mean Salary" to the nearest whole dollar amount
+    tableMergeClean.forEach(row => {
+    row['Mean Salary'] = Math.round(row['Mean Salary']);
+    });
+
+    // Create a new array with Probability >= 0.80
+    let above80 = tableMergeClean.filter(row => row['Probability'] >= 0.80);
     
-        // Create a new array with Probability >= 0.80
-        let above80 = tableMergeClean.filter(row => row['Probability'] >= 0.80);
+    // Initialize an object to store the sums of each state column
+    let stateSums = {};
+
+    // Loop through the tableMerge data to calculate sums
+    above80.forEach(row => {
+        // Loop through each state column and sum the values
+        for (let state in row) {
+            if (state !== 'Occupation' && state !== 'Total Employed' && state !== 'Mean Salary' && state !== 'Probability') {stateSums[state] = (stateSums[state] || 0) + parseFloat(row[state]);
+            }
+        }
+    });
+
+    // Create an array to hold the state-sum pairs
+    let stateSumPairs = [];
+
+    // Convert the state sums object into an array of pairs
+    for (let state in stateSums) {
+        stateSumPairs.push([state, stateSums[state]]);
+    }
+
+    // Format the data for Highcharts Map
+    const data = stateSumData.map(([state, sum]) => [state, sum]);
+
+    // Now you can use the 'data' array for your Highcharts Map visualization
+    // Example usage: Highcharts.mapChart('container', {
+    //     series: [{
+    //         data: data
+    //     }]
+    // });
+
+    // Continue with the rest of your code...
+    
+    =============================
 
         // HELP >> Eliminate unnecessary columns -OR- specify columns to include?
         let plotByState = above80.map(row => ({

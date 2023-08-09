@@ -103,79 +103,48 @@
         // Create a new array with Probability >= 0.80
         let above80 = tableMergeClean.filter(row => row['Probability'] >= 0.80);
         
-        // Transform data in preparation for joining to map
-        
-        // Prepare demo data. 
-        const data = [
-            ['us-ma', 10], ['us-wa', 11], ['us-ca', 12], ['us-or', 13],
-            ['us-wi', 14], ['us-me', 15], ['us-mi', 16], ['us-nv', 17],
-            ['us-nm', 18], ['us-co', 19], ['us-wy', 20], ['us-ks', 21],
-            ['us-ne', 22], ['us-ok', 23], ['us-mo', 24], ['us-il', 25],
-            ['us-in', 26], ['us-vt', 27], ['us-ar', 28], ['us-tx', 29],
-            ['us-ri', 30], ['us-al', 31], ['us-ms', 32], ['us-nc', 33],
-            ['us-va', 34], ['us-ia', 35], ['us-md', 36], ['us-de', 37],
-            ['us-pa', 38], ['us-nj', 39], ['us-ny', 40], ['us-id', 41],
-            ['us-sd', 42], ['us-ct', 43], ['us-nh', 44], ['us-ky', 45],
-            ['us-oh', 46], ['us-tn', 47], ['us-wv', 48], ['us-dc', 49],
-            ['us-la', 50], ['us-fl', 51], ['us-ga', 52], ['us-sc', 53],
-            ['us-mn', 54], ['us-mt', 55], ['us-nd', 56], ['us-az', 57],
-            ['us-ut', 58], ['us-hi', 59], ['us-ak', 60]
-        ];
+        // Initialize an object to store the sums of each state column
+        let stateSums = {};
 
-    // Create the chart
-    Highcharts.mapChart('container', {
-        chart: {map: topology
-        },
-
-        title: {text: 'Highcharts Maps basic demo'
-        },
-
-        subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'
-        },
-
-        mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}
-        },
-
-        colorAxis: {min: 0},
-
-        series: [{data: data, name: 'Random data', 
-                  states: {hover: {color: '#BADA55'}},
-                  dataLabels: {enabled: true, format: '{point.name}'}}]});
-    })();
-
-    
-    ============================================
-        // HELP >> Eliminate unnecessary columns -OR- specify columns to include?
-        let plotByState = above80.map(row => ({
-            ...row,
-            'OCC_Code': undefined,
-            'Occupation': undefined,
-            'Probability': undefined,
-            'Total Employed': undefined,
-            'Mean Salary': undefined}));
-
-        // Obtain total count of jobs lost by state
-        let plotByStateSum = {};
-        plotByState.forEach(row => {
-            Object.keys(row).forEach(key => {
-                if (key !== 'State') {
-                    plotByStateSum[key] = (plotByStateSum[key] || 0) + parseFloat(row[key]);}
-            });
+        // Loop through the tableMerge data to calculate sums
+        above80.forEach(row => {
+            // Loop through each state column and sum the values
+            for (let state in row) {
+                if (state !== 'Occupation' && state !== 'Total Employed' && state !== 'Mean Salary' && state !== 'Probability') {stateSums[state] = (stateSums[state] || 0) + parseFloat(row[state]);
+                }
+            }
         });
-    
-    // Create arrays for state names and job counts
-      let states = Object.keys(plotByStateSum);
-      let jobCounts = Object.values(plotByStateSum);
 
-      // Create the bar chart using Plotly.js
-      let trace = {x: states, y: jobCounts, type: 'bar'};
+        // Create an array to hold the state-sum pairs
+        let stateSumPairs = [];
 
-      let layout = {
-          title: 'Anticipated Number of Jobs Lost to Automation',
-          xaxis: {title: 'State', tickangle: -45, automargin: true},
-          yaxis: {title: '# of Jobs'}};
+        // Convert the state sums object into an array of pairs
+        for (let state in stateSums) {
+            stateSumPairs.push([state, stateSums[state]]);
+        }
 
-    Plotly.newPlot('barChart', [trace], layout);
-}).catch(error => {
-    console.error('An error occurred:', error);
-});
+        // Format the data for Highcharts Map
+        const data = stateSumPairs.map(([state, sum]) => [state, sum]);
+
+        // Create the chart
+        Highcharts.mapChart('container', {
+            chart: {map: topology
+                   },
+
+            title: {text: 'Highcharts Maps basic demo'},
+
+            subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'},
+
+            mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}
+                           },
+
+            colorAxis: {min: 0},
+
+            series: [{data: data, name: 'Random data', 
+                      states: {hover: {color: '#BADA55'}},
+                      dataLabels: {enabled: true, format: '{point.name}'
+                                  }
+                     }]
+        });
+    })();
+})
