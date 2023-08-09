@@ -1,55 +1,23 @@
-body {
-    font-family: Arial, sans-serif;
-}
-
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-h1 {
-    text-align: center;
-}
-
-#scraped-data {
-    /* Add your CSS styles to format the scraped data here */
-}
-
-
-/* Add your existing CSS styles */
-
+/* Add margin to create space below the dropdown */
 .dropdown {
-    position: relative;
-    display: inline-block;
+    margin-bottom: 20px; /* Adjust the value as needed for the desired space */
 }
 
-.dropdown button {
-    background-color: #f1f1f1;
-    color: #333;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
+/* Add border styles for the table */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ccc; /* Set the border color and style for the whole table */
 }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    z-index: 1;
+/* Add border styles for the table header cells (th) */
+th {
+    border: 1px solid #ccc; /* Set the border color and style for table header cells */
+    padding: 8px; /* Add padding for better appearance */
 }
 
-.dropdown-content li {
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-}
-
-.dropdown-content li:hover {
-    background-color: #ddd;
-}
-
-.show {
-    display: block;
+/* Add border styles for the table data cells (td) */
+td {
+    border: 1px solid #ccc; /* Set the border color and style for table data cells */
+    padding: 8px; /* Add padding for better appearance */
 }
