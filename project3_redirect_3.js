@@ -18,11 +18,9 @@ function parseCSV(csvData) {
         for (let j = 0; j < headers.length; j++) {
             rowObj[headers[j]] = values[j];
         }
-
         // Push the row object to the data array
         data.push(rowObj);
     }
-
     return data;
 }
 
@@ -32,8 +30,8 @@ $.when(
     $.get('NEW_data_files/automation_data_by_state_2.csv')
 ).done(function(occSalaryCSV, autoDataCSV) {
     // Parse the CSV data using the parseCSV function
-    let occSalary = parseCSV(occSalaryCSV);
-    let autoData = parseCSV(autoDataCSV);
+    let occSalary = parseCSV(occSalaryCSV[0]);
+    let autoData = parseCSV(autoDataCSV[0]);
 
     // Rename columns in Table 1 for merge prep
     occSalary = occSalary.map(row => ({
@@ -234,6 +232,5 @@ $.when(
                 }
             }
         }]
-    });
-})();
-})
+    });})
+    

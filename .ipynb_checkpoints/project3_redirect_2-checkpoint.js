@@ -32,8 +32,8 @@ $.when(
     $.get('NEW_data_files/automation_data_by_state_2.csv')
 ).done(function(occSalaryCSV, autoDataCSV) {
     // Parse the CSV data using the parseCSV function
-    let occSalary = parseCSV(occSalaryCSV);
-    let autoData = parseCSV(autoDataCSV);
+    let occSalary = parseCSV(occSalaryCSV[0]);
+    let autoData = parseCSV(autoDataCSV[0]);
 
     // Rename columns in Table 1 for merge prep
     occSalary = occSalary.map(row => ({
@@ -142,99 +142,98 @@ $.when(
         }
     });
               
-        // Create an array to hold the state-sum trio
-        let stateSumOcc = [];
+    // Create an array to hold the state-sum trio
+    let stateSumOcc = [];
 
-        // Convert the state sums object into an array of triples
-        for (let state in stateData) {
-            stateSumOcc.push({
-                stateKey: stateKeyMap[state],
-                sum: stateData[state].sum,
-                topOccupations: stateData[state].topOccupations.sort((a,b) => b.probability - a.probability).slice(0, 10)
-            });
-        }
-
-        // Create a mapping of state names to map keys
-        let stateKeyMap = {
-            'Alabama': 'us-al',
-            'Alaska': 'us-ak',
-            'Arizona': 'us-az',
-            'Arkansas': 'us-ar',
-            'California': 'us-ca',
-            'Colorado': 'us-co',
-            'Connecticut': 'us-ct',
-            'Delaware': 'us-de',
-            'Florida': 'us-fl',
-            'Georgia': 'us-ga',
-            'Hawaii': 'us-hi',
-            'Idaho': 'us-id',
-            'Illinois': 'us-il',
-            'Indiana': 'us-in',
-            'Iowa': 'us-ia',
-            'Kansas': 'us-ks',
-            'Kentucky': 'us-ky',
-            'Louisiana': 'us-la',
-            'Maine': 'us-me',
-            'Maryland': 'us-md',
-            'Massachusetts': 'us-ma',
-            'Michigan': 'us-mi',
-            'Minnesota': 'us-mn',
-            'Mississippi': 'us-ms',
-            'Missouri': 'us-mo',
-            'Montana': 'us-mt',
-            'Nebraska': 'us-ne',
-            'Nevada': 'us-nv',
-            'New Hampshire': 'us-nh',
-            'New Jersey': 'us-nj',
-            'New Mexico': 'us-nm',
-            'New York': 'us-ny',
-            'North Carolina': 'us-nc',
-            'North Dakota': 'us-nd',
-            'Ohio': 'us-oh',
-            'Oklahoma': 'us-ok',
-            'Oregon': 'us-or',
-            'Pennsylvania': 'us-pa',
-            'Rhode Island': 'us-ri',
-            'South Carolina': 'us-sc',
-            'South Dakota': 'us-sd',
-            'Tennessee': 'us-tn',
-            'Texas': 'us-tx',
-            'Utah': 'us-ut',
-            'Vermont': 'us-vt',
-            'Virginia': 'us-va',
-            'Washington': 'us-wa',
-            'West Virginia': 'us-wv',
-            'Wisconsin': 'us-wi',
-            'Wyoming': 'us-wy',
-        };
-
-        // Format the data for Highcharts Map
-        const data = stateSumOcc.map(([state, sum]) => [stateKeyMap[state], sum]);
-        
-        // Create the chart
-        Highcharts.mapChart('container', {
-            chart: {map: topology},
-            title: {text: 'Jobs Lost to Automation: Impact by State'},
-            subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'},
-            mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}},
-            colorAxis: {min: 0},
-            series: [{
-                data: stateSumOcc,
-                name: 'Random data',
-                states: {hover: {color: '#BADA55'}},
-                dataLabels: {enabled: true, format: '{point.name}'},
-                events: {
-                    // Callback for click event on a state
-                    click: function (event) {
-                        let stateName = Object.keys(stateKeyMap).find(key => stateKeyMap[key] === event.point.stateKey);
-                        let topOccupations = event.point.topOccupations.map(occ => `${occ.occupation}: ${occ.probability}%`);
-                              
-                        // Display additional information, e.g., in an alert
-                        alert(`State: ${stateName}\nTotal: ${event.point.sum}\nTop Occupations:\n${topOccupations.join('\n')}`);
-                    }
-                }
-            }]
+    // Convert the state sums object into an array of triples
+    for (let state in stateData) {
+        stateSumOcc.push({
+            stateKey: stateKeyMap[state],
+            sum: stateData[state].sum,
+            topOccupations: stateData[state].topOccupations.sort((a,b) => b.probability - a.probability).slice(0, 10)
         });
-    })();
+    }
+
+    // Create a mapping of state names to map keys
+    let stateKeyMap = {
+        'Alabama': 'us-al',
+        'Alaska': 'us-ak',
+        'Arizona': 'us-az',
+        'Arkansas': 'us-ar',
+        'California': 'us-ca',
+        'Colorado': 'us-co',
+        'Connecticut': 'us-ct',
+        'Delaware': 'us-de',
+        'Florida': 'us-fl',
+        'Georgia': 'us-ga',
+        'Hawaii': 'us-hi',
+        'Idaho': 'us-id',
+        'Illinois': 'us-il',
+        'Indiana': 'us-in',
+        'Iowa': 'us-ia',
+        'Kansas': 'us-ks',
+        'Kentucky': 'us-ky',
+        'Louisiana': 'us-la',
+        'Maine': 'us-me',
+        'Maryland': 'us-md',
+        'Massachusetts': 'us-ma',
+        'Michigan': 'us-mi',
+        'Minnesota': 'us-mn',
+        'Mississippi': 'us-ms',
+        'Missouri': 'us-mo',
+        'Montana': 'us-mt',
+        'Nebraska': 'us-ne',
+        'Nevada': 'us-nv',
+        'New Hampshire': 'us-nh',
+        'New Jersey': 'us-nj',
+        'New Mexico': 'us-nm',
+        'New York': 'us-ny',
+        'North Carolina': 'us-nc',
+        'North Dakota': 'us-nd',
+        'Ohio': 'us-oh',
+        'Oklahoma': 'us-ok',
+        'Oregon': 'us-or',
+        'Pennsylvania': 'us-pa',
+        'Rhode Island': 'us-ri',
+        'South Carolina': 'us-sc',
+        'South Dakota': 'us-sd',
+        'Tennessee': 'us-tn',
+        'Texas': 'us-tx',
+        'Utah': 'us-ut',
+        'Vermont': 'us-vt',
+        'Virginia': 'us-va',
+        'Washington': 'us-wa',
+        'West Virginia': 'us-wv',
+        'Wisconsin': 'us-wi',
+        'Wyoming': 'us-wy',
+    };
+
+    // Format the data for Highcharts Map
+    const data = stateSumOcc.map(([state, sum]) => [stateKeyMap[state], sum]);
+
+    // Create the chart
+    Highcharts.mapChart('container', {
+        chart: {map: topology},
+        title: {text: 'Jobs Lost to Automation: Impact by State'},
+        subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'},
+        mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}},
+        colorAxis: {min: 0},
+        series: [{
+            data: stateSumOcc,
+            name: 'Random data',
+            states: {hover: {color: '#BADA55'}},
+            dataLabels: {enabled: true, format: '{point.name}'},
+            events: {
+                // Callback for click event on a state
+                click: function (event) {
+                    let stateName = Object.keys(stateKeyMap).find(key => stateKeyMap[key] === event.point.stateKey);
+                    let topOccupations = event.point.topOccupations.map(occ => `${occ.occupation}: ${occ.probability}%`);
+
+                    // Display additional information, e.g., in an alert
+                    alert(`State: ${stateName}\nTotal: ${event.point.sum}\nTop Occupations:\n${topOccupations.join('\n')}`);
+                }
+            }
+        }]
+    });
+})();
 })
-    
