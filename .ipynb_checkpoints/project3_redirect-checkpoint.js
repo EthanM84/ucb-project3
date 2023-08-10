@@ -90,7 +90,7 @@
         });
         
         // Convert "Mean Salary" and "Probability" columns to numeric
-        tableMergeClean = tableMergeClean.map(row => ({
+        let tableMergeClean = tableMergeClean.map(row => ({
             ...row,
             'Mean Salary': parseFloat(row['Mean Salary']),
             'Probability': parseFloat(row['Probability'])
@@ -186,7 +186,7 @@
             chart: {map: topology
                    },
 
-            title: {text: 'Highcharts Maps basic demo'},
+            title: {text: 'Jobs Lost to Automation: Impact by State'},
             subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'},
 
             mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}

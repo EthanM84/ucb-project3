@@ -90,7 +90,7 @@
         });
         
         // Convert "Mean Salary" and "Probability" columns to numeric
-        tableMergeClean = tableMergeClean.map(row => ({
+        let tableMergeClean = tableMergeClean.map(row => ({
             ...row,
             'Mean Salary': parseFloat(row['Mean Salary']),
             'Probability': parseFloat(row['Probability'])
