@@ -1,27 +1,11 @@
-// Initiate parse function
+// Use PapaParse to parse the CSV data
 function parseCSV(csvData) {
-    // Split the CSV data by new line character to get rows
-    let rows = csvData.split('\n');
-
-    // Extract headers from the first row
-    let headers = rows[0].split(',');
-
-    // Initialize an array to store the parsed data
-    let data = [];
-
-    // Loop through the remaining rows and extract values
-    for (let i = 1; i < rows.length; i++) {
-        let values = rows[i].split(',');
-
-        // Create an object with headers as keys and values as values
-        let rowObj = {};
-        for (let j = 0; j < headers.length; j++) {
-            rowObj[headers[j]] = values[j];
-        }
-        // Push the row object to the data array
-        data.push(rowObj);
-    }
-    return data;
+    let parsedData = Papa.parse(csvData, {
+        header: true,
+        skipEmptyLines: true,
+    });
+    
+    return parsedData.data;
 }
 
 // Load the CSV files using jQuery's $.get method
@@ -32,17 +16,29 @@ $.when(
     // Parse the CSV data using the parseCSV function
     let occSalary = parseCSV(occSalaryCSV[0]);
     let autoData = parseCSV(autoDataCSV[0]);
-
+    
     // Rename columns in Table 1 for merge prep
     occSalary = occSalary.map(row => ({
         ...row,
         'Occupation': row['OCC_TITLE'],
         'Total Employed': row['TOT_EMP'],
         'Mean Salary': row['A_MEAN']}));
+    console.log('autoData', autoData)
+    // Replace double hyphens with single hyphens in Occupation values
+    occSalary = occSalary.map(row => ({
+        ...row,
+    'Occupation': row['Occupation'].replace('--', '-')
+}));
+    autoData = autoData.map(row => ({
+        ...row,
+    'Occupation': row['Occupation'].replace('--', '-')
+}));
 
     // Merge tables on 'Occupation'
     let tableMerge = autoData.map(autoRow => {
         let occRow = occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation']);
+        // console.log('autoRow:', autoRow);
+        // console.log('occRow:', occRow);
         return {
             'Occupation': autoRow['Occupation'],
             'Probability': autoRow['Probability'],
@@ -96,10 +92,9 @@ $.when(
             'West Virginia': autoRow['West Virginia'],
             'Wisconsin': autoRow['Wisconsin'],
             'Wyoming': autoRow['Wyoming'],
-            'Total Employed': occRow['Total Employed'],
-            'Mean Salary': occRow['Mean Salary']};
+            'Total Employed': occRow['Total Employed']};
         });
-        
+      
     // Convert "Mean Salary" and "Probability" columns to numeric
     let tableMergeClean = tableMergeClean.map(row => ({
         ...row,
@@ -207,7 +202,7 @@ $.when(
     };
 
     // Format the data for Highcharts Map
-    const data = stateSumOcc.map(([state, sum]) => [stateKeyMap[state], sum]);
+    const data = stateSumOcc.map(({stateKey, sum }) => [stateKey, sum]);
 
     // Create the chart
     Highcharts.mapChart('container', {
@@ -217,7 +212,7 @@ $.when(
         mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}},
         colorAxis: {min: 0},
         series: [{
-            data: stateSumOcc,
+            data: data,
             name: 'Random data',
             states: {hover: {color: '#BADA55'}},
             dataLabels: {enabled: true, format: '{point.name}'},
@@ -232,5 +227,6 @@ $.when(
                 }
             }
         }]
-    });})
+    });
+})
     
