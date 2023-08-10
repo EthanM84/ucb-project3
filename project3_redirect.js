@@ -1,5 +1,10 @@
 (async () => {
     
+    // Highcharts code for fetching U.S. map
+    const topology = await fetch(
+        'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json').then(response => response.json());
+    console.log("Topology fetched");
+    
     // Import data from two .csv files
     Promise.all([
         fetch('NEW_data_files/occupation_salary_2.csv').then(response => response.text()),
@@ -96,10 +101,6 @@
         row['Mean Salary'] = Math.round(row['Mean Salary']);
         });
         
-        // Highcharts code for fetching U.S. map
-        const topology = await fetch(
-        'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json').then(response => response.json());
-    
         // Create a new array with Probability >= 0.80
         let above80 = tableMergeClean.filter(row => row['Probability'] >= 0.80);
         
@@ -123,23 +124,74 @@
             stateSumPairs.push([state, stateSums[state]]);
         }
 
-        // Format the data for Highcharts Map
-        const data = stateSumPairs.map(([state, sum]) => [state, sum]);
+        // Create a mapping of state names to map keys
+        let stateKeyMap = {
+            'Alabama': 'us-al',
+            'Alaska': 'us-ak',
+            'Arizona': 'us-az',
+            'Arkansas': 'us-ar',
+            'California': 'us-ca',
+            'Colorado': 'us-co',
+            'Connecticut': 'us-ct',
+            'Delaware': 'us-de',
+            'Florida': 'us-fl',
+            'Georgia': 'us-ga',
+            'Hawaii': 'us-hi',
+            'Idaho': 'us-id',
+            'Illinois': 'us-il',
+            'Indiana': 'us-in',
+            'Iowa': 'us-ia',
+            'Kansas': 'us-ks',
+            'Kentucky': 'us-ky',
+            'Louisiana': 'us-la',
+            'Maine': 'us-me',
+            'Maryland': 'us-md',
+            'Massachusetts': 'us-ma',
+            'Michigan': 'us-mi',
+            'Minnesota': 'us-mn',
+            'Mississippi': 'us-ms',
+            'Missouri': 'us-mo',
+            'Montana': 'us-mt',
+            'Nebraska': 'us-ne',
+            'Nevada': 'us-nv',
+            'New Hampshire': 'us-nh',
+            'New Jersey': 'us-nj',
+            'New Mexico': 'us-nm',
+            'New York': 'us-ny',
+            'North Carolina': 'us-nc',
+            'North Dakota': 'us-nd',
+            'Ohio': 'us-oh',
+            'Oklahoma': 'us-ok',
+            'Oregon': 'us-or',
+            'Pennsylvania': 'us-pa',
+            'Rhode Island': 'us-ri',
+            'South Carolina': 'us-sc',
+            'South Dakota': 'us-sd',
+            'Tennessee': 'us-tn',
+            'Texas': 'us-tx',
+            'Utah': 'us-ut',
+            'Vermont': 'us-vt',
+            'Virginia': 'us-va',
+            'Washington': 'us-wa',
+            'West Virginia': 'us-wv',
+            'Wisconsin': 'us-wi',
+            'Wyoming': 'us-wy',
+            };
 
+        // Format the data for Highcharts Map
+        const data = stateSumPairs.map(([state, sum]) => [stateKeyMap[state], sum]);
+        
         // Create the chart
         Highcharts.mapChart('container', {
             chart: {map: topology
                    },
 
             title: {text: 'Highcharts Maps basic demo'},
-
             subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'},
 
             mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}
                            },
-
             colorAxis: {min: 0},
-
             series: [{data: data, name: 'Random data', 
                       states: {hover: {color: '#BADA55'}},
                       dataLabels: {enabled: true, format: '{point.name}'
