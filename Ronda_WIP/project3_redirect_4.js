@@ -7,9 +7,6 @@ function parseCSV(csvData) {
     return parsedData.data;
 }
 
-// Define the map URL
-let topology = 'http://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
-
 // Load the CSV files using jQuery's $.get method
 $.when(
     $.get('Resources/occupation_salary_2.csv'),
@@ -22,6 +19,7 @@ $.when(
         
     // Rename columns from Table 1 for merge prep
     occSalary = occSalary.map(row => ({
+        ...row,
         'SOC': row['OCC_CODE'],
         'Occupation': row['OCC_TITLE'],
         'Total Employed': row['TOT_EMP'],
@@ -30,7 +28,9 @@ $.when(
         
     // Merge tables on 'Occupation'
     let tableMerge = autoData.map(autoRow => {
-        let occRow = occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation']);
+        let occRow = occSalary.find(
+            (occRow) => occRow['Occupation'] === autoRow['Occupation']
+        );
         return {
             'Occupation': autoRow['Occupation'],
             'Probability': autoRow['Probability'],
@@ -95,7 +95,7 @@ $.when(
     }));
 
     // Loop through all remaining columns (with 3 exceptions) and set data type to integer
-    tableMergeClean.forEach(row => {
+    tableMergeClean.forEach((row) => {
         for (let value in row) {
             if (value !== 'SOC' && value !== 'Occupation' && value !== 'Probability'){
                 row[value] = parseInt(row[value])
@@ -104,24 +104,29 @@ $.when(
     });
     
     // Create a new array of occupations with 80%+ chance of automation
-    let above80 = tableMergeClean.filter(row => row['Probability'] >= 0.795);
+    let above80 = tableMergeClean.filter((row) => row['Probability'] >= 0.795);
     
     // Initialize an object to store the total employed by state AND top 10 at-risk occupations
-    let stateSum = {};
+    let stateSum = [];
     
     // Loop through the rows to calculate sums for each state
-    above80.forEach(row => {
+    above80.forEach((row) => {
         for (let state in row) {
-            if (state !== 'SOC' && state !== 'Occupation' && state !== 'Total Employed' && state !== 'Probability'){
+            if (
+                state !== 'SOC' &&
+                state !== 'Occupation' &&
+                state !== 'Total Employed' &&
+                state !== 'Probability'
+            ) {
                 stateSum[state] = (stateSum[state] || {
                     sum: 0,
                     highRisk: []
-                });
-                                    
+                };
+                
                 // Store 10 occupations with highest risk for automation per state
                 if (row[state] > 0) {
                     stateSum[state].highRisk.push({
-                        occupation: row['Occupation']
+                        occupation: row['Occupation'],
                     });
                 }
             }
@@ -188,13 +193,14 @@ $.when(
         stateData.push({
             stateKey: keyMap[state],
             sum: stateSum[state].sum,
-            highRisk: stateSum[state].highRisk.sort((a,b) => b.probability - a.probability).slice(0, 10)
+            highRisk: stateSum[state].highRisk.sort((a,b) => b.probability - a.probability).slice(0, 10),
         });
     }
          
     // Convert map to array
     const mapData = stateData.map(({stateKey, sum }) => [stateKey, sum]);
         
+    // Create the chart
     Highcharts.mapChart('container', {
         chart: {map: topology},
         title: {text: 'Jobs Lost to Automation: Impact by State'},
