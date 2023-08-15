@@ -197,6 +197,11 @@ $.when(
         });
     }
          
+    (async () => {
+        const topology = await fetch(
+            "https://code.highcharts.com/mapdata/custom/north-america.topo.json"
+    ).then((response) => response.json());
+    
     // Convert map to array
     const mapData = stateData.map(({stateKey, sum }) => [stateKey, sum]);
         
