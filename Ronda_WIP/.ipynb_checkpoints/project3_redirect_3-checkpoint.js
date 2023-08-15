@@ -5,129 +5,146 @@ function parseCSV(csvData) {
         skipEmptyLines: true,
     });    
     return parsedData.data;
-}
+};
 
 // Define the map URL
 let topology = 'http://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
 
 // Load the CSV files using jQuery's $.get method
 $.when(
-    $.get('NEW_data_files/occupation_salary_2.csv'),
-    $.get('NEW_data_files/automation_data_by_state_2.csv')
+    $.get('Resources/occupation_salary_2.csv'),
+    $.get('Resources/automation_data_by_state_2.csv')
 ).done(function(occSalaryCSV, autoDataCSV) {
     
     // Parse the CSV data using the parseCSV function
     let occSalary = parseCSV(occSalaryCSV[0]);
     let autoData = parseCSV(autoDataCSV[0]);
-    
-    
-    // Rename columns in Table 1 for merge prep
+        
+    // Rename columns from Table 1 for merge prep
     occSalary = occSalary.map(row => ({
-        ...row,
+        'SOC': row['OCC_CODE'],
         'Occupation': row['OCC_TITLE'],
         'Total Employed': row['TOT_EMP'],
         'Mean Salary': row['A_MEAN']}));
+        
+    // Merge tables
+    let tableMerge = {...autoData, ...occSalary};
     
-    // Merge tables on 'Occupation'
-    let tableMerge = autoData.map(autoRow => {
-        let occRow = occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation']);
-        return {
-            'Occupation': autoRow['Occupation'],
-            'Probability': autoRow['Probability'],
-            'Alabama': autoRow['Alabama'],
-            'Alaska': autoRow['Alaska'],
-            'Arizona': autoRow['Arizona'],
-            'Arkansas': autoRow['Arkansas'],
-            'California': autoRow['California'],
-            'Colorado': autoRow['Colorado'],
-            'Connecticut': autoRow['Connecticut'],
-            'Delaware': autoRow['Delaware'],
-            'Florida': autoRow['Florida'],
-            'Georgia': autoRow['Georgia'],
-            'Hawaii': autoRow['Hawaii'],
-            'Idaho': autoRow['Idaho'],
-            'Illinois': autoRow['Illinois'],
-            'Indiana': autoRow['Indiana'],
-            'Iowa': autoRow['Iowa'],
-            'Kansas': autoRow['Kansas'],
-            'Kentucky': autoRow['Kentucky'],
-            'Louisiana': autoRow['Louisiana'],
-            'Maine': autoRow['Maine'],
-            'Maryland': autoRow['Maryland'],
-            'Massachusetts': autoRow['Massachusetts'],
-            'Michigan': autoRow['Michigan'],
-            'Minnesota': autoRow['Minnesota'],
-            'Mississippi': autoRow['Mississippi'],
-            'Missouri': autoRow['Missouri'],
-            'Montana': autoRow['Montana'],
-            'Nebraska': autoRow['Nebraska'],
-            'Nevada': autoRow['Nevada'],
-            'New Hampshire': autoRow['New Hampshire'],
-            'New Jersey': autoRow['New Jersey'],
-            'New Mexico': autoRow['New Mexico'],
-            'New York': autoRow['New York'],
-            'North Carolina': autoRow['North Carolina'],
-            'North Dakota': autoRow['North Dakota'],
-            'Ohio': autoRow['Ohio'],
-            'Oklahoma': autoRow['Oklahoma'],
-            'Oregon': autoRow['Oregon'],
-            'Pennsylvania': autoRow['Pennsylvania'],
-            'Rhode Island': autoRow['Rhode Island'],
-            'South Carolina': autoRow['South Carolina'],
-            'South Dakota': autoRow['South Dakota'],
-            'Tennessee': autoRow['Tennessee'],
-            'Texas': autoRow['Texas'],
-            'Utah': autoRow['Utah'],
-            'Vermont': autoRow['Vermont'],
-            'Virginia': autoRow['Virginia'],
-            'Washington': autoRow['Washington'],
-            'West Virginia': autoRow['West Virginia'],
-            'Wisconsin': autoRow['Wisconsin'],
-            'Wyoming': autoRow['Wyoming'],
-            'Total Employed': occRow['Total Employed']};
-        });
-      
-    // Convert "Mean Salary" and "Probability" columns to numeric
+    // let tableMerge = autoData.map(autoRow => {
+    //     let occRow = occSalary.find(occRow => occRow['Occupation'] === autoRow['Occupation']);
+    //     return {
+    //         'Occupation': autoRow['Occupation'],
+    //         'Probability': autoRow['Probability'],
+    //         'Alabama': autoRow['Alabama'],
+    //         'Alaska': autoRow['Alaska'],
+    //         'Arizona': autoRow['Arizona'],
+    //         'Arkansas': autoRow['Arkansas'],
+    //         'California': autoRow['California'],
+    //         'Colorado': autoRow['Colorado'],
+    //         'Connecticut': autoRow['Connecticut'],
+    //         'Delaware': autoRow['Delaware'],
+    //         'Florida': autoRow['Florida'],
+    //         'Georgia': autoRow['Georgia'],
+    //         'Hawaii': autoRow['Hawaii'],
+    //         'Idaho': autoRow['Idaho'],
+    //         'Illinois': autoRow['Illinois'],
+    //         'Indiana': autoRow['Indiana'],
+    //         'Iowa': autoRow['Iowa'],
+    //         'Kansas': autoRow['Kansas'],
+    //         'Kentucky': autoRow['Kentucky'],
+    //         'Louisiana': autoRow['Louisiana'],
+    //         'Maine': autoRow['Maine'],
+    //         'Maryland': autoRow['Maryland'],
+    //         'Massachusetts': autoRow['Massachusetts'],
+    //         'Michigan': autoRow['Michigan'],
+    //         'Minnesota': autoRow['Minnesota'],
+    //         'Mississippi': autoRow['Mississippi'],
+    //         'Missouri': autoRow['Missouri'],
+    //         'Montana': autoRow['Montana'],
+    //         'Nebraska': autoRow['Nebraska'],
+    //         'Nevada': autoRow['Nevada'],
+    //         'New Hampshire': autoRow['New Hampshire'],
+    //         'New Jersey': autoRow['New Jersey'],
+    //         'New Mexico': autoRow['New Mexico'],
+    //         'New York': autoRow['New York'],
+    //         'North Carolina': autoRow['North Carolina'],
+    //         'North Dakota': autoRow['North Dakota'],
+    //         'Ohio': autoRow['Ohio'],
+    //         'Oklahoma': autoRow['Oklahoma'],
+    //         'Oregon': autoRow['Oregon'],
+    //         'Pennsylvania': autoRow['Pennsylvania'],
+    //         'Rhode Island': autoRow['Rhode Island'],
+    //         'South Carolina': autoRow['South Carolina'],
+    //         'South Dakota': autoRow['South Dakota'],
+    //         'Tennessee': autoRow['Tennessee'],
+    //         'Texas': autoRow['Texas'],
+    //         'Utah': autoRow['Utah'],
+    //         'Vermont': autoRow['Vermont'],
+    //         'Virginia': autoRow['Virginia'],
+    //         'Washington': autoRow['Washington'],
+    //         'West Virginia': autoRow['West Virginia'],
+    //         'Wisconsin': autoRow['Wisconsin'],
+    //         'Wyoming': autoRow['Wyoming'],
+    //         'Total Employed': occRow['Total Employed']};
+    //     });
+    // Convert "Probability" values to decimal and Total Employed to integer.
     let tableMergeClean = tableMerge.map(row => ({
-        ...row,
-        'Mean Salary': parseFloat(row['Mean Salary']),
         'Probability': parseFloat(row['Probability'])
     }));
 
-    // Round "Mean Salary" to the nearest whole dollar amount
+    // Loop through all remaining columns and set data type to integer
     tableMergeClean.forEach(row => {
-        row['Mean Salary'] = Math.round(row['Mean Salary']);
+        for (let value in row) {
+            if (value !== 'SOC' && value !== 'Occupation' && value !== 'Probability'){
+                row[value] = parseInt(row[value])}
+        }
     });
-
+    
+    // Initialize an object to store the total employed by state and (top 10) high risk occupations
+    if (state !== 'SOC' && state !== 'Occupation' && state !== 'Total Employed' && state !== 'Probability'){
+        let stateSum = d3.rollup(tableMergeClean, 
+    
+        // Loop through the tableMergeClean data to calculate sums   
+        tableMergeClean.forEach(column => {
+            for (let state in column) {
+                if (state !== 'SOC' && state !== 'Occupation' && state !== 'Total Employed' && state !== 'Probability'){
+                    stateSum[state] = (stateSum[state] || {
+                        sum: 0,
+                        highRisk: []
+                    });
+                    
+                    // Collect top 10 occupations at highest risk for automation
+                    
+                        
     // Create a new array with Probability >= 0.80
     let above80 = tableMergeClean.filter(row => row['Probability'] >= 0.80);
 
-    // Initialize an object to store the sums and top 10 occupations of each state column
+    // Create a variable to store the sums AND top 10 occupations at risk for each state
     let stateData = {};
-
-    // Loop through the tableMerge data to calculate sums and Top 10
-    above80.forEach(row => {
-        // Loop through each state column and sum the values
-        for (let state in row) {
-            if (state !== 'Occupation' && state !== 'Total Employed' && state !== 'Mean Salary' && state !== 'Probability'){
-                // Convert the value to a numeric data type
-                row[state] = parseInt(row[state]);
-                stateData[state] = (stateData[state] || {
-                    sum: 0,
-                    topOccupations: []
-                });
-                stateData[state].sum += row[state];
+    
+//     // Loop through the tableMerge data to calculate sums and Top 10
+//     above80.forEach(row => {
+//         // Loop through each state column and sum the values
+//         for (let state in row) {
+//             if (state !== 'Occupation' && state !== 'Total Employed' && state !== 'Probability'){
+//                 // Convert the values to integer
+//                 row[state] = parseInt(row[state]);
+//                 stateData[state] = (stateData[state] || {
+//                     sum: 0,
+//                     highRisk: []
+//                 });
+//                 stateData[state].sum += row[state];
                 
-                // Collect top occupations with highest probability
-                if (row[state] > 0) {
-                    stateData[state].topOccupations.push({
-                        occupation: row['Occupation'],
-                        probability: parseFloat(row[state])
-                    });
-                }
-            }
-        }
-    });
+//                 // Collect top occupations with highest probability
+//                 if (row[state] > 0) {
+//                     stateData[state].highRisk.push({
+//                         occupation: row['Occupation'],
+//                         probability: parseFloat(row[state])
+//                     });
+//                 }
+//             }
+//         }
+//     });
     console.log('State Data:', stateData)
     // Create a mapping of state names to map keys
     let stateKeyMap = {
@@ -196,9 +213,9 @@ $.when(
     }
 
     // Format the data for Highcharts Map
-    //const data = stateSumOcc.map(({stateKey, sum }) => [stateKey, sum]);
+    // const data = stateSumOcc.map(({stateKey, sum }) => [stateKey, sum]);
     // Create the chart
-    const data = [
+   const data = [
         ['us-ma', 8258520], ['us-wa', 7780380], ['us-ca', 41870530], ['us-or', 4407430],
         ['us-wi', 6937430], ['us-me', 1357720], ['us-mi', 10050440], ['us-nv', 3137150],
         ['us-nm', 1805000], ['us-co', 6292640], ['us-wy', 575970], ['us-ks', 3168370],
@@ -364,13 +381,14 @@ $.when(
             'New Accounts Clerks, 510'
         ],
     };
-
+    
     Highcharts.mapChart('container', {
         chart: {map: topology},
         title: {text: 'Jobs Lost to Automation: Impact by State'},
         subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'},
         mapNavigation: {enabled: true, buttonOptions: {verticalAlign: 'bottom'}},
         colorAxis: {min: 0},
+        // console.log("data:", data),
         series: [{
             data: data,
             name: 'Random data',
