@@ -8,7 +8,7 @@ function parseCSV(csvData) {
 };
 
 // Define the map URL
-let topology = 'http://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
+let topology = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
 
 // Load the CSV files using jQuery's $.get method
 $.when(

@@ -7,25 +7,16 @@ function parseCSV(csvData) {
     return parsedData.data;
 }
 
-// Log a message to indicate the parsing process is starting
-console.log("Parsing CSV files...");
-
 // Load the CSV files using jQuery's $.get method
 $.when(
     $.get('Resources/occupation_salary_2.csv'),
     $.get('Resources/automation_data_by_state_2.csv'))
 .done(function(occSalaryCSV, autoDataCSV) {
     
-    // Log to indicate that CSV loading is complete
-    console.log("CSV files loaded.");
-    
     // Parse the CSV data using the parseCSV function
     let occSalary = parseCSV(occSalaryCSV[0]);
     let autoData = parseCSV(autoDataCSV[0]);
-    
-    // Log parsed data for verification
-    console.log("Parsed Automation Data:", autoData);
-        
+      
     // Rename columns from Table 1 for merge prep
     occSalary = occSalary.map(row => ({
         ...row,
@@ -34,9 +25,6 @@ $.when(
         'Total Employed': row['TOT_EMP'],
         'Mean Salary': row['A_MEAN']
     }));
-    
-    // Log parsed data for verification
-    console.log("Parsed Occupation Salary Data:", occSalary);
         
     // Merge tables on 'Occupation'
     let tableMerge = autoData.map(autoRow => {
@@ -100,19 +88,13 @@ $.when(
             'Mean Salary': occRow['Mean Salary']
         };
     });
-    
-    // Log merged data array for verification
-    console.log("Merged Tables Data:", tableMerge);
-    
+     
     // Convert "Probability" values to decimal
     let tableMergeClean = tableMerge.map(row => ({
         ...row,
         'Probability': parseFloat(row['Probability'])
     }));
     
-    // Log CLEAN merged data array for verification
-    console.log("Merged with converted data type:", tableMergeClean);
-
     // Loop through all remaining columns (with 3 exceptions) and set data type to integer
     tableMergeClean.forEach((row) => {
         for (let value in row) {
@@ -137,15 +119,17 @@ $.when(
                 state !== 'Total Employed' &&
                 state !== 'Probability'
             ) {
-                stateSum[state] = (stateSum[state] || {
+                stateSum[state] = stateSum[state] || {
                     sum: 0,
                     highRisk: []
-                });
+                };
                 
-                // Store 10 occupations with highest risk for automation per state
+                // Assemble double that includes top 10 occupations by probability
                 if (row[state] > 0) {
+                    stateSum[state].sum += row[state];
                     stateSum[state].highRisk.push({
                         occupation: row['Occupation'],
+                        probability: row['Probability']
                     });
                 }
             }
@@ -218,28 +202,16 @@ $.when(
     
     // Log stateData for verification
     console.log("State Data:", stateData);
-       
-    // Convert map to array
-    const mapData = stateData.map(({stateKey, sum }) => [stateKey, sum]);
-    
-    // // Log mapData for verification
-    // console.log("Map Data:", mapData);
-    
-    let topology = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
-    
-    // // Log the map URL for verification
-    // console.log("Map Topology URL:", topology);
-    
-    // Fetch the TopoJSON file
-    fetch(topology)
-      .then(response => response.json())
-      .then(topoData => {
-        // Convert TopoJSON to GeoJSON
-        let geoData = topojson.feature(topoData, topoData.objects.states);
-                  
-        // Create the chart
-        Highcharts.mapChart('container', {
-            chart: {map: geoData},
+
+    $(document).ready(function() {
+        // Code to be executed when the DOM is ready
+        const mapData = stateData.map(({stateKey, sum }) => [stateKey, sum]);
+
+        let topology = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
+        
+        // Initiate the map chart
+        let mapChart = Highcharts.mapChart('container', {
+            chart: {map: topology},
             title: {text: 'Jobs Lost to Automation: Impact by State'},
             mapNavigation: {
                 enabled: true, 
@@ -249,6 +221,9 @@ $.when(
             },
             colorAxis: {
                 min: 0
+            },
+            tooltip: {
+                footerFormat: '<span style="font-size: 10px">(Click for High Risk Jobs)</span>'
             },
             series: [{
                 data: mapData,
@@ -266,8 +241,11 @@ $.when(
                 events: {
                     // Callback for click event on a state
                     click: function (event) {
+                        console.log("Clicked stateKey:", event.point.stateKey);
                         let stateName = Object.keys(keyMap).find(key => keyMap[key] === event.point.stateKey);
+                        console.log("Mapped stateName:", stateName);
                         let highRisk = stateData.find(({stateKey}) => stateKey === event.point.stateKey).highRisk;
+                        console.log("High Risk data:", highRisk);
                         // List occupations most impacted when clicked
                         alert(`State: ${stateName}\nHighest Risk for Automation:\nTop 10:\n${highRisk.map(({occupation}) => occupation).join('\n')}`
                         );
@@ -275,5 +253,5 @@ $.when(
                 }
             }]
         });
-    })
-});
+    });
+})

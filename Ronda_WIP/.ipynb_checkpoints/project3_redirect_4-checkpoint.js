@@ -7,15 +7,24 @@ function parseCSV(csvData) {
     return parsedData.data;
 }
 
+// Log a message to indicate the parsing process is starting
+console.log("Parsing CSV files...");
+
 // Load the CSV files using jQuery's $.get method
 $.when(
     $.get('Resources/occupation_salary_2.csv'),
     $.get('Resources/automation_data_by_state_2.csv'))
 .done(function(occSalaryCSV, autoDataCSV) {
     
+    // Log to indicate that CSV loading is complete
+    console.log("CSV files loaded.");
+    
     // Parse the CSV data using the parseCSV function
     let occSalary = parseCSV(occSalaryCSV[0]);
     let autoData = parseCSV(autoDataCSV[0]);
+    
+    // Log parsed data for verification
+    console.log("Parsed Automation Data:", autoData);
         
     // Rename columns from Table 1 for merge prep
     occSalary = occSalary.map(row => ({
@@ -25,6 +34,9 @@ $.when(
         'Total Employed': row['TOT_EMP'],
         'Mean Salary': row['A_MEAN']
     }));
+    
+    // Log parsed data for verification
+    console.log("Parsed Occupation Salary Data:", occSalary);
         
     // Merge tables on 'Occupation'
     let tableMerge = autoData.map(autoRow => {
@@ -89,10 +101,17 @@ $.when(
         };
     });
     
-    // Convert "Probability" values to decimal and Total Employed to integer.
+    // Log merged data array for verification
+    console.log("Merged Tables Data:", tableMerge);
+    
+    // Convert "Probability" values to decimal
     let tableMergeClean = tableMerge.map(row => ({
+        ...row,
         'Probability': parseFloat(row['Probability'])
     }));
+    
+    // Log CLEAN merged data array for verification
+    console.log("Merged with converted data type:", tableMergeClean);
 
     // Loop through all remaining columns (with 3 exceptions) and set data type to integer
     tableMergeClean.forEach((row) => {
@@ -121,7 +140,7 @@ $.when(
                 stateSum[state] = (stateSum[state] || {
                     sum: 0,
                     highRisk: []
-                };
+                });
                 
                 // Store 10 occupations with highest risk for automation per state
                 if (row[state] > 0) {
@@ -196,51 +215,65 @@ $.when(
             highRisk: stateSum[state].highRisk.sort((a,b) => b.probability - a.probability).slice(0, 10),
         });
     }
-         
-    (async () => {
-        const topology = await fetch(
-            "https://code.highcharts.com/mapdata/custom/north-america.topo.json"
-    ).then((response) => response.json());
     
+    // Log stateData for verification
+    console.log("State Data:", stateData);
+       
     // Convert map to array
     const mapData = stateData.map(({stateKey, sum }) => [stateKey, sum]);
-        
-    // Create the chart
-    Highcharts.mapChart('container', {
-        chart: {map: topology},
-        title: {text: 'Jobs Lost to Automation: Impact by State'},
-        subtitle: {text: 'Source map: <a href="http://code.highcharts.com/mapdata/countries/us/us-all.topo.json">United States of America</a>'},
-        mapNavigation: {
-            enabled: true, 
-            buttonOptions: {
-                verticalAlign: 'bottom'
-            }
-        },
-        colorAxis: {
-            min: 0
-        },
-        series: [{
-            data: mapData,
-            name: 'Jobs Lost to Automation',
-            joinBy: 'stateKey',
-            states: {
-                hover: {
-                    color: '#BADA55'
+    
+    // // Log mapData for verification
+    // console.log("Map Data:", mapData);
+    
+    let topology = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
+    
+    // // Log the map URL for verification
+    // console.log("Map Topology URL:", topology);
+    
+    // Fetch the TopoJSON file
+    fetch(topology)
+      .then(response => response.json())
+      .then(topoData => {
+        // Convert TopoJSON to GeoJSON
+        let geoData = topojson.feature(topoData, topoData.objects.states);
+                  
+        // Create the chart
+        Highcharts.mapChart('container', {
+            chart: {map: geoData},
+            title: {text: 'Jobs Lost to Automation: Impact by State'},
+            mapNavigation: {
+                enabled: true, 
+                buttonOptions: {
+                    verticalAlign: 'bottom'
                 }
             },
-            dataLabels: {
-                enabled: true,
-                format: '{point.name}'
+            colorAxis: {
+                min: 0
             },
-            events: {
-                // Callback for click event on a state
-                click: function (event) {
-                    let stateName = Object.keys(keyMap).find(key => keyMap[key] === event.point.stateKey);
-                    let highRisk = stateData.find(({ stateKey }) => stateKey === event.point.stateKey).highRisk;
-                    // List occupations most impacted when clicked
-                    alert(`State: ${stateName}\nHighest Risk for Automation:\nTop 10:\n${highRisk.map(({ occupation }) => occupation).join('\n')}`);
+            series: [{
+                data: mapData,
+                name: 'Jobs Lost to Automation',
+                joinBy: 'stateKey',
+                states: {
+                    hover: {
+                        color: '#BADA55'
+                    }
                 },
-            }
-        }],
-    },
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                },
+                events: {
+                    // Callback for click event on a state
+                    click: function (event) {
+                        let stateName = Object.keys(keyMap).find(key => keyMap[key] === event.point.stateKey);
+                        let highRisk = stateData.find(({stateKey}) => stateKey === event.point.stateKey).highRisk;
+                        // List occupations most impacted when clicked
+                        alert(`State: ${stateName}\nHighest Risk for Automation:\nTop 10:\n${highRisk.map(({occupation}) => occupation).join('\n')}`
+                        );
+                    }
+                }
+            }]
+        });
+    })
 });
