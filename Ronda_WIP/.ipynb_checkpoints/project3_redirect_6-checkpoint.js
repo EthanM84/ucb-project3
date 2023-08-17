@@ -16,7 +16,7 @@ $.when(
     // Parse the CSV data using the parseCSV function
     let occSalary = parseCSV(occSalaryCSV[0]);
     let autoData = parseCSV(autoDataCSV[0]);
-      
+       
     // Rename columns from Table 1 for merge prep
     occSalary = occSalary.map(row => ({
         ...row,
@@ -25,7 +25,7 @@ $.when(
         'Total Employed': row['TOT_EMP'],
         'Mean Salary': row['A_MEAN']
     }));
-        
+ 
     // Merge tables on 'Occupation'
     let tableMerge = autoData.map(autoRow => {
         let occRow = occSalary.find(
@@ -200,8 +200,14 @@ $.when(
         });
     }
     
-    // Log stateData for verification
-    console.log("State Data:", stateData);
+    // Convert stateData to a JSON string
+    let stateDataJSON = JSON.stringify(stateData, null, 2);
+
+    // Log the JSON string to the console
+    console.log('stateData JSON:', stateDataJSON);
+    
+    // // Log stateData for verification
+    // console.log("State Data:", stateData);
 
     $(document).ready(function() {
         // Code to be executed when the DOM is ready
