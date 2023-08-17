@@ -200,14 +200,8 @@ $.when(
         });
     }
     
-    // Convert stateData to a JSON string
-    let stateDataJSON = JSON.stringify(stateData, null, 2);
-
-    // Log the JSON string to the console
-    console.log('stateData JSON:', stateDataJSON);
-    
-    // // Log stateData for verification
-    // console.log("State Data:", stateData);
+     // Log stateData for verification
+    console.log("State Data:", stateData);
 
     $(document).ready(function() {
         // Code to be executed when the DOM is ready
