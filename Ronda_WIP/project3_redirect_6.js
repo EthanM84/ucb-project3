@@ -3,7 +3,7 @@ function parseCSV(csvData) {
     let parsedData = Papa.parse(csvData, {
         header: true,
         skipEmptyLines: true
-    });
+    })
     return parsedData.data;
 }
 
@@ -138,56 +138,56 @@ $.when(
     
     // Map state names to map keys
     let keyMap = {
-        'Alabama': 'us-al',
-        'Alaska': 'us-ak',
-        'Arizona': 'us-az',
-        'Arkansas': 'us-ar',
-        'California': 'us-ca',
-        'Colorado': 'us-co',
-        'Connecticut': 'us-ct',
-        'Delaware': 'us-de',
-        'Florida': 'us-fl',
-        'Georgia': 'us-ga',
-        'Hawaii': 'us-hi',
-        'Idaho': 'us-id',
-        'Illinois': 'us-il',
-        'Indiana': 'us-in',
-        'Iowa': 'us-ia',
-        'Kansas': 'us-ks',
-        'Kentucky': 'us-ky',
-        'Louisiana': 'us-la',
-        'Maine': 'us-me',
-        'Maryland': 'us-md',
-        'Massachusetts': 'us-ma',
-        'Michigan': 'us-mi',
-        'Minnesota': 'us-mn',
-        'Mississippi': 'us-ms',
-        'Missouri': 'us-mo',
-        'Montana': 'us-mt',
-        'Nebraska': 'us-ne',
-        'Nevada': 'us-nv',
-        'New Hampshire': 'us-nh',
-        'New Jersey': 'us-nj',
-        'New Mexico': 'us-nm',
-        'New York': 'us-ny',
-        'North Carolina': 'us-nc',
-        'North Dakota': 'us-nd',
-        'Ohio': 'us-oh',
-        'Oklahoma': 'us-ok',
-        'Oregon': 'us-or',
-        'Pennsylvania': 'us-pa',
-        'Rhode Island': 'us-ri',
-        'South Carolina': 'us-sc',
-        'South Dakota': 'us-sd',
-        'Tennessee': 'us-tn',
-        'Texas': 'us-tx',
-        'Utah': 'us-ut',
-        'Vermont': 'us-vt',
-        'Virginia': 'us-va',
-        'Washington': 'us-wa',
-        'West Virginia': 'us-wv',
-        'Wisconsin': 'us-wi',
-        'Wyoming': 'us-wy'
+        'Alabama': 'AL',
+        'Alaska': 'AK',
+        'Arizona': 'AZ',
+        'Arkansas': 'AR',
+        'California': 'CA',
+        'Colorado': 'CO',
+        'Connecticut': 'CT',
+        'Delaware': 'DE',
+        'Florida': 'FL',
+        'Georgia': 'GA',
+        'Hawaii': 'HI',
+        'Idaho': 'ID',
+        'Illinois': 'IL',
+        'Indiana': 'IN',
+        'Iowa': 'IA',
+        'Kansas': 'KS',
+        'Kentucky': 'KY',
+        'Louisiana': 'LA',
+        'Maine': 'ME',
+        'Maryland': 'MD',
+        'Massachusetts': 'MA',
+        'Michigan': 'MI',
+        'Minnesota': 'MN',
+        'Mississippi': 'MS',
+        'Missouri': 'MO',
+        'Montana': 'MT',
+        'Nebraska': 'NE',
+        'Nevada': 'NV',
+        'New Hampshire': 'NH',
+        'New Jersey': 'NJ',
+        'New Mexico': 'NM',
+        'New York': 'NY',
+        'North Carolina': 'NC',
+        'North Dakota': 'ND',
+        'Ohio': 'OH',
+        'Oklahoma': 'OK',
+        'Oregon': 'OR',
+        'Pennsylvania': 'PA',
+        'Rhode Island': 'RI',
+        'South Carolina': 'SC',
+        'South Dakota': 'SD',
+        'Tennessee': 'TN',
+        'Texas': 'TX',
+        'Utah': 'UT',
+        'Vermont': 'VT',
+        'Virginia': 'VA',
+        'Washington': 'WA',
+        'West Virginia': 'WV',
+        'Wisconsin': 'WI',
+        'Wyoming': 'WY'
     };
 
     // Create an array to hold plot data (key, stateSum, highest risk for automation per state)
@@ -195,63 +195,107 @@ $.when(
     for (let state in stateSum) {
         stateData.push({
             stateKey: keyMap[state],
+            stateName: state,
             sum: stateSum[state].sum,
             highRisk: stateSum[state].highRisk.sort((a,b) => b.probability - a.probability).slice(0, 10),
         });
     }
     
-     // Log stateData for verification
+    // Log stateData for verification
     console.log("State Data:", stateData);
 
-    $(document).ready(function() {
+    $(function() {
         // Code to be executed when the DOM is ready
-        const mapData = stateData.map(({stateKey, sum }) => [stateKey, sum]);
-
-        let topology = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
+        const mapData = stateData.map(state => ({
+            abbrev: state.stateKey,
+            stateName: state.stateName,
+            sum: state.sum,
+            highRisk: state.highRisk,
+        }));
         
-        // Initiate the map chart
-        let mapChart = Highcharts.mapChart('container', {
-            chart: {map: topology},
-            title: {text: 'Jobs Lost to Automation: Impact by State'},
-            mapNavigation: {
-                enabled: true, 
-                buttonOptions: {
-                    verticalAlign: 'bottom'
-                }
-            },
-            colorAxis: {
-                min: 0
-            },
-            tooltip: {
-                footerFormat: '<span style="font-size: 10px">(Click for High Risk Jobs)</span>'
-            },
-            series: [{
-                data: mapData,
-                name: 'Jobs Lost to Automation',
-                joinBy: 'stateKey',
-                states: {
-                    hover: {
-                        color: '#BADA55'
+        // Log mapData for verification
+        console.log("Map Data:", mapData);
+                                                
+        $.getJSON(
+            'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', function(data){buildChart(data);}
+        );
+        
+        function buildChart(topology){                            
+            // Initiate the map chart
+            Highcharts.mapChart('container', {
+                chart: {
+                    map: topology
+                },
+                title: {
+                    text: 'Jobs Lost to Automation: >80% Probability'
+                },
+                legend: {
+                    layout: 'horizontal',
+                    borderWidth: 0,
+                    backgroundColor: 'rgba(255,255,255,0.85)',
+                    floating: true,
+                    verticalAlign: 'bottom',
+                    y: 25,
+                    title: {
+                        text: 'Anticipated Number of Jobs Lost per State'
                     }
                 },
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.name}'
-                },
-                events: {
-                    // Callback for click event on a state
-                    click: function (event) {
-                        console.log("Clicked stateKey:", event.point.stateKey);
-                        let stateName = Object.keys(keyMap).find(key => keyMap[key] === event.point.stateKey);
-                        console.log("Mapped stateName:", stateName);
-                        let highRisk = stateData.find(({stateKey}) => stateKey === event.point.stateKey).highRisk;
-                        console.log("High Risk data:", highRisk);
-                        // List occupations most impacted when clicked
-                        alert(`State: ${stateName}\nHighest Risk for Automation:\nTop 10:\n${highRisk.map(({occupation}) => occupation).join('\n')}`
-                        );
+                mapNavigation: {
+                    enabled: true, 
+                    buttonOptions: {
+                        verticalAlign: 'bottom'
                     }
-                }
-            }]
-        });
+                },
+                colorAxis: {
+                    min: 1,
+                    type: 'logarithmic',
+                    minColor: '#EEEEFF',
+                    maxColor: '#000022',
+                    stops: [
+                        [0, '#EFEFFF'],
+                        [0.67, '#4444FF'],
+                        [1, '#000022']
+                    ]
+                },
+                tooltip: {
+                    backgroundColor: 'none',
+                    borderWidth: 0,
+                    shadow: false,
+                    useHTML: true,
+                    padding: 0,
+                    pointFormat: '{point.stateName}: {point.sum}',
+                    footerFormat: '<span style="font-size: 10px">(Click for High Risk Jobs)</span>'
+                },
+                series: [{
+                    animation: {
+                        duration: 1000
+                    },
+                    data: mapData,
+                    name: 'Jobs Lost to Automation',
+                    // Display list of highRisk jobs when selecting a state
+                    point: {
+                        events: {
+                            click: function () {
+                                let clickData = stateData.find(data => data.stateName === this.stateName);
+                                if (clickData) {
+                                    let highRiskList = clickData.highRisk.map(job => job.occupation).join('\n');
+                                    let popupContent = `
+                                <div style="font-weight: bold; font-size: 16px;">Highest Risk for Automation in ${this.stateName}:</div>
+                                ${highRiskList}
+                            `;
+                                    // alert(alertMessage);
+                                }
+                            }
+                        }
+                    },
+                    joinBy: ['postal-code', 'abbrev'],
+                    dataLabels: {
+                        enabled: true,
+                        color: '#FFFFFF',
+                        format: '{point.abbrev}'
+                    },
+                }],
+            })
+        }
     });
-})
+});
