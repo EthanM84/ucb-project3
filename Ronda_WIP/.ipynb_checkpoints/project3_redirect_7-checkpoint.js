@@ -211,12 +211,23 @@ $.when(
             stateName: state.stateName,
             sum: state.sum,
             highRisk: state.highRisk,
-            value: state.sum,
+            value: state.sum
         }));
+        
+        // let ddData = mapData.map(object => ({
+        //     id: object.abbrev,
+        //     ddName: object.stateName,
+        //     ddData: object.highRisk.map(item => [item.x, item.y])
+        //     )
+        // }));
         
         // Log mapData for verification
         console.log("Map Data:", mapData);
-                                                
+        
+        // Create a container for the text information
+        var textContainer = document.createElement('div');
+        document.body.appendChild(textContainer);
+                                      
         $.getJSON(
             'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', function(data){buildChart(data);}
         );
@@ -227,7 +238,31 @@ $.when(
             // Initiate the map chart
             Highcharts.mapChart('container', {
                 chart: {
-                    map: topology
+                    map: topology,
+                    events: {
+                        drilldown: function (e) {
+                            // Clear the text container
+                            textContainer.innerHTML = '';
+                            
+                            // Set the drilldown key and related data
+                            var point = e.point;
+                            var riskData = point.highRisk;
+                                                           
+                                // Drilldown title
+                                var title = document.createElement('h2');
+                                title.textContent = 'Jobs Most at Risk from Automation in ' + ddName + ' + Probability';
+                                textContainer.appendChild(title);
+
+                                // List highRisk jobs + probability of job loss
+                                var riskList = document.createElement('ul');
+                                ddData.forEach(function (item) {
+                                    var riskListItem = document.createElement('li');
+                                    riskListItem.textContent = item.occupation + ', ' + (item.probability * 100) + '%';
+                                    riskList.appendChild(riskListItem);
+                                });
+                                textContainer.appendChild(riskList);
+                        }
+                    }
                 },
                 title: {
                     text: 'Jobs Lost to Automation: >80% Probability'
@@ -291,8 +326,7 @@ $.when(
                     shadow: false,
                     useHTML: true,
                     padding: 0,
-                    pointFormat: '{point.stateName}: {point.sum}',
-                    // footerFormat: '<span style="font-size: 10px">(Click for High Risk Jobs)</span>'
+                    pointFormat: '{point.stateName}: {point.sum}'
                 },
                 series: [{
                     type: 'map',
@@ -301,35 +335,6 @@ $.when(
                         duration: 1000
                     },
                     data: mapData,
-                    // Display list of highRisk jobs when selecting a state
-                    point: {
-                        events: {
-                            click: function (event) {
-                                let clickData = stateData.find(data => data.stateName === this.stateName);
-                                if (clickData) {
-                                    let highRiskList = clickData.highRisk.map(job => job.occupation).join('\n');
-                                    let popUp = `
-                                        <div style="font-weight: bold; font-size: 16px;">Jobs Most at Risk from Automation in ${this.stateName}:</div>
-                                        ${highRiskList}
-                                    `;
-                                    
-                                    // Use jQuery to popup details for each state
-                                    let $dialog = $('<div></div>');
-                                    $dialog.html(popUp)
-                                    $dialog.dialog({
-                                        title: this.stateName,
-                                        width: 320,
-                                        height: 'auto',
-                                        resizable: false,
-                                        modal: true,
-                                        close: function(event,ui) {
-                                            $(this).dialog('destroy').remove();
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    },
                     joinBy: ['postal-code', 'abbrev'],
                     dataLabels: {
                         enabled: true,
@@ -338,6 +343,6 @@ $.when(
                     },
                 }],
             })
-        }
+        };
     });
 });
