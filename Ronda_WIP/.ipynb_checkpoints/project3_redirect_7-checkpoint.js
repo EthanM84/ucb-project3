@@ -214,15 +214,17 @@ $.when(
             value: state.sum
         }));
         
-        // let ddData = mapData.map(object => ({
-        //     id: object.abbrev,
-        //     ddName: object.stateName,
-        //     ddData: object.highRisk.map(item => [item.x, item.y])
-        //     )
-        // }));
-        
         // Log mapData for verification
         console.log("Map Data:", mapData);
+                
+        let ddData = mapData.map(object => ({
+            id: object.abbrev,
+            ddName: object.stateName,
+            ddHighRisk: object.highRisk.map(item => [item.occupation, item.probability])
+        }));
+        
+        // Log ddData for verification
+        console.log("Drilldown Data:", ddData);
         
         // Create a container for the text information
         var textContainer = document.createElement('div');
@@ -241,32 +243,43 @@ $.when(
                     map: topology,
                     events: {
                         drilldown: function (e) {
-                            // Clear the text container
-                            textContainer.innerHTML = '';
-                            
                             // Set the drilldown key and related data
                             var point = e.point;
-                            var riskData = point.highRisk;
-                                                           
+                            var riskData = point.ddHighRisk;
+                            
+                            // Display drilldown information
+                            var textContainer = document.getElementById('textContainer');
+                            
+                            // Clear the text container
+                            textContainer.innerHTML = '';
+                                                                                       
                                 // Drilldown title
                                 var title = document.createElement('h2');
-                                title.textContent = 'Jobs Most at Risk from Automation in ' + ddName + ' + Probability';
+                                title.textContent = 'Top 10 Jobs Most at Risk from Automation in ' + point.ddName;
                                 textContainer.appendChild(title);
 
                                 // List highRisk jobs + probability of job loss
                                 var riskList = document.createElement('ul');
-                                ddData.forEach(function (item) {
+                                riskData.forEach(function (item) {
+                                    var occupation = item[0];
+                                    var probability = item[1] * 100;
+                                    
                                     var riskListItem = document.createElement('li');
-                                    riskListItem.textContent = item.occupation + ', ' + (item.probability * 100) + '%';
+                                    riskListItem.textContent = occupation + ': ' + probability.toFixed(2) + '%';
                                     riskList.appendChild(riskListItem);
                                 });
                                 textContainer.appendChild(riskList);
-                        }
+                        },
                     }
                 },
                 title: {
-                    text: 'Jobs Lost to Automation: >80% Probability'
+                    text: 'Jobs Lost to Automation: >80% Confidence'
                 },
+                subtitle: [{
+                    text: 'Source Data: U.S. Bureau of Labor Statistics'
+                }, {
+                    text: 'Source Data: "The Future of Employment" (2013) by Carl Benedikt Frey & Michael Osborne'
+                }],
                 legend: {
                     layout: 'horizontal',
                     borderWidth: 0,
@@ -279,19 +292,19 @@ $.when(
                         style: {
                             color: (
                                 Highcharts.defaultOptions &&
-                                    Highcharts.defaultOptions.legend &&
-                                    Highcharts.defaultOptions.legend.title &&
-                                    Highcharts.defaultOptions.legend.title.style &&
-                                    Highcharts.defaultOptions.legend.title.style.color
+                                Highcharts.defaultOptions.legend &&
+                                Highcharts.defaultOptions.legend.title &&
+                                Highcharts.defaultOptions.legend.title.style &&
+                                Highcharts.defaultOptions.legend.title.style.color
                             ) || 'black'
-                        }
-                    }
+                        },
+                    },
                 },
                 mapNavigation: {
                     enabled: true, 
                     buttonOptions: {
                         verticalAlign: 'bottom'
-                    }
+                    },
                 },
                 colorAxis: {
                     min: 200000,
@@ -309,7 +322,7 @@ $.when(
                     map: {
                         states: {
                             hover: {
-                                color: '#FFB89E'
+                                color: '#FAF082'
                             }
                         }
                     }
@@ -332,7 +345,7 @@ $.when(
                     type: 'map',
                     mapData: Highcharts.maps['countries/us/us-all.topo'],
                     animation: {
-                        duration: 1000
+                        duration: 1500
                     },
                     data: mapData,
                     joinBy: ['postal-code', 'abbrev'],
@@ -343,6 +356,6 @@ $.when(
                     },
                 }],
             })
-        };
+        }
     });
-});
+})
