@@ -227,9 +227,9 @@ $.when(
         // Log ddData for verification
         console.log("Drilldown Data:", ddData);
         
-        // Create a container for the text information
-        let textContainer = document.getElementById('textContainer');
-        document.body.appendChild(textContainer);
+//         // Create a container for the text information
+//         let textContainer = document.getElementById('textContainer');
+//         document.body.appendChild(textContainer);
                                       
         $.getJSON(
             'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', function(data){buildChart(data);}
@@ -240,44 +240,6 @@ $.when(
         function buildChart(topology){                            
             // Initiate the map chart
             Highcharts.mapChart('container', {
-                chart: {
-                    map: topology,
-                    events: {
-                        drilldown: function (e) {
-                            // Add drilldown data and update the chart
-                            this.addSeriesAsDrilldown(e.point, e.seriesOptions);
-                            
-                            // Set the drilldown key and related data
-                            let point = e.point;
-                            let riskData = point.ddHighRisk;
-                            
-                            console.log('RiskData', riskData);
-                            
-                            // Display drilldown information
-                            let textContainer = document.getElementById('textContainer');
-                            
-                            // Clear the text container
-                            textContainer.innerHTML = '';
-                                                                                       
-                                // Drilldown title
-                                let title = document.createElement('h2');
-                                title.textContent = 'Top 10 Jobs Most at Risk from Automation in ' + point.ddName;
-                                textContainer.appendChild(title);
-
-                                // List highRisk jobs + probability of job loss
-                                let riskList = document.createElement('ul');
-                                riskData.forEach(function (item) {
-                                    let occupation = item[0];
-                                    let probability = item[1] * 100;
-                                    
-                                    let riskListItem = document.createElement('li');
-                                    riskListItem.textContent = occupation + ': ' + probability.toFixed(2) + '%';
-                                    riskList.appendChild(riskListItem);
-                                });
-                                textContainer.appendChild(riskList);
-                        },
-                    }
-                },
                 drilldown: {
                     series: ddData.map(item => ({
                         id: item.id,
@@ -290,6 +252,45 @@ $.when(
                     dataLabels: {
                         enabled: true,
                         format: '{point.name}: {point.y:.2f}%'
+                    }
+                },
+                chart: {
+                    map: topology,
+                    events: {
+                        drilldown: function (e) {
+                            // Add drilldown data and update the chart
+                            this.addSeriesAsDrilldown(e.point, e.seriesOptions);
+                            
+                            // Set the drilldown key and related data
+                            let point = e.point;
+                            let riskData = point.highRisk;
+                            
+                            console.log('ePoint', point);
+                            console.log('RiskData', riskData);
+                            
+                            // Display drilldown information
+                            let textContainer = document.getElementById('textContainer');
+                            
+                            // Clear the text container
+                            textContainer.innerHTML = '';
+                                                                                       
+                            // Drilldown title
+                            let title = document.createElement('h2');
+                            title.textContent = 'Top 10 Jobs Most at Risk from Automation in ' + point.ddName;
+                            textContainer.appendChild(title);
+
+                            // List highRisk jobs + probability of job loss
+                            let riskList = document.createElement('ul');
+                            riskData.forEach(function (item) {
+                                let occupation = item[0];
+                                let probability = item[1] * 100;
+
+                                let riskListItem = document.createElement('li');
+                                riskListItem.textContent = occupation + ': ' + probability.toFixed(2) + '%';
+                                riskList.appendChild(riskListItem);
+                            });
+                            textContainer.appendChild(riskList);
+                        },
                     }
                 },
                 title: {
