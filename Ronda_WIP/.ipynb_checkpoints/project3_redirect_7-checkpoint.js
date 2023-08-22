@@ -227,7 +227,7 @@ $.when(
         console.log("Drilldown Data:", ddData);
         
         // Create a container for the text information
-        var textContainer = document.createElement('div');
+        let textContainer = document.getElementById('textContainer');
         document.body.appendChild(textContainer);
                                       
         $.getJSON(
@@ -243,28 +243,31 @@ $.when(
                     map: topology,
                     events: {
                         drilldown: function (e) {
+                            // Add drilldown data and update the chart
+                            this.addSeriesAsDrilldown(e.point, e.seriesOptions);
+                            
                             // Set the drilldown key and related data
-                            var point = e.point;
-                            var riskData = point.ddHighRisk;
+                            let point = e.point;
+                            let riskData = point.ddHighRisk;
                             
                             // Display drilldown information
-                            var textContainer = document.getElementById('textContainer');
+                            let textContainer = document.getElementById('textContainer');
                             
                             // Clear the text container
                             textContainer.innerHTML = '';
                                                                                        
                                 // Drilldown title
-                                var title = document.createElement('h2');
+                                let title = document.createElement('h2');
                                 title.textContent = 'Top 10 Jobs Most at Risk from Automation in ' + point.ddName;
                                 textContainer.appendChild(title);
 
                                 // List highRisk jobs + probability of job loss
-                                var riskList = document.createElement('ul');
+                                let riskList = document.createElement('ul');
                                 riskData.forEach(function (item) {
-                                    var occupation = item[0];
-                                    var probability = item[1] * 100;
+                                    let occupation = item[0];
+                                    let probability = item[1] * 100;
                                     
-                                    var riskListItem = document.createElement('li');
+                                    let riskListItem = document.createElement('li');
                                     riskListItem.textContent = occupation + ': ' + probability.toFixed(2) + '%';
                                     riskList.appendChild(riskListItem);
                                 });
@@ -272,14 +275,22 @@ $.when(
                         },
                     }
                 },
+                drilldown: {
+                    series: ddData.map(item => ({
+                        id: item.id,
+                        name: item.ddName,
+                        data: item.ddHighRisk.map(highRiskItem => ({
+                            name: highRiskItem[0],
+                            y: highRiskItem[1] * 100
+                        }))
+                    }))
+                },
                 title: {
                     text: 'Jobs Lost to Automation: >80% Confidence'
                 },
-                subtitle: [{
-                    text: 'Source Data: U.S. Bureau of Labor Statistics'
-                }, {
-                    text: 'Source Data: "The Future of Employment" (2013) by Carl Benedikt Frey & Michael Osborne'
-                }],
+                subtitle: {
+                    text: 'Source: U.S. Bureau of Labor Statistics & "The Future of Employment" (2013)'
+                },
                 legend: {
                     layout: 'horizontal',
                     borderWidth: 0,
@@ -308,7 +319,7 @@ $.when(
                 },
                 colorAxis: {
                     min: 200000,
-                    max: 18500000,
+                    max: 20000000,
                     type: 'logarithmic',
                     minColor: '#EEEEFF',
                     maxColor: '#000022',
@@ -349,6 +360,8 @@ $.when(
                     },
                     data: mapData,
                     joinBy: ['postal-code', 'abbrev'],
+                    allowPointSelect: true,
+                    cursor: 'pointer',
                     dataLabels: {
                         enabled: true,
                         color: '#FFFFFF',
