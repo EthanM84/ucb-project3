@@ -211,14 +211,15 @@ $.when(
             stateName: state.stateName,
             sum: state.sum,
             highRisk: state.highRisk,
-            value: state.sum
+            value: state.sum,
+            drilldown: state.stateKey
         }));
         
         // Log mapData for verification
         console.log("Map Data:", mapData);
                 
         let ddData = mapData.map(object => ({
-            id: object.abbrev,
+            id: object.drilldown,
             ddName: object.stateName,
             ddHighRisk: object.highRisk.map(item => [item.occupation, item.probability])
         }));
@@ -249,6 +250,8 @@ $.when(
                             // Set the drilldown key and related data
                             let point = e.point;
                             let riskData = point.ddHighRisk;
+                            
+                            console.log('RiskData', riskData);
                             
                             // Display drilldown information
                             let textContainer = document.getElementById('textContainer');
@@ -286,7 +289,8 @@ $.when(
                     })),
                     dataLabels: {
                         enabled: true,
-                        format: '{point.name}: {point.
+                        format: '{point.name}: {point.y:.2f}%'
+                    }
                 },
                 title: {
                     text: 'Jobs Lost to Automation: >80% Confidence'
