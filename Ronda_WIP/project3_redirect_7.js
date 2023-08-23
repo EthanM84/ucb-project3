@@ -291,53 +291,59 @@ $.when(
                                 // Use JQuery UI to popup a bar chart when clicking on state
                                 click: function () {
                                     let highRisk = this.highRisk;
-                                    console.log("this highRisk:", highRisk);
-                                    highRisk.forEach(function (item) {
+                                    if (highRisk) {
+                                        $('#dialog').dialog({
+                                            title: this.name,
+                                            width: 650,
+                                            height: 450,
+                                            open: function () {
+                                                // Create a unique ID for the chart container
+                                                let containerId = 'chartContainer' + this.abbrev;
+                                                $('<div>').attr({
+                                                    id: containerId
+                                                }).appendTo('#dialog');
+                                                
+                                                // Extract occupation data and num data from highRisk array
+                                                let occupationData = highRisk.map(item => item.occupation);
+                                                let numData = highRisk.map(item => item.num);
+                                                
+                                                // Sort numData in descending order
+                                                numData.sort((a, b) => b - a);
 
-                                        if (highRisk) {
-                                            $('#dialog').dialog({
-                                                title: this.name,
-                                                width: 450,
-                                                height: 350,
-                                                open: function () {
-                                                    // Create a unique ID for the chart container
-                                                    let containerId = 'chartContainer' + this.abbrev;
-                                                    $('<div>').attr({
-                                                        id: containerId
-                                                    }).appendTo('#dialog');
-
-                                                    // Create the chart within the new container
-                                                    let barChartOptions = {
-                                                        chart: {
-                                                            renderTo: containerId,
-                                                            type: 'bar'
-                                                        },
+                                                // Create the chart within the new container
+                                                let barChartOptions = {
+                                                    chart: {
+                                                        renderTo: containerId,
+                                                        type: 'bar'
+                                                    },
+                                                    title: {
+                                                        text: 'Top 10 At-Risk Occupations'
+                                                    },
+                                                    xAxis: {
+                                                        categories: occupationData
+                                                    },
+                                                    yAxis: {
                                                         title: {
-                                                            text: 'Top 10 At-Risk Occupations'
-                                                        },
-                                                        xAxis: {
-                                                            categories: occupationData
-                                                        },
-                                                        yAxis: {
-                                                            title: {
-                                                                text: 'Number Employed'
-                                                            }
-                                                        },
-                                                        series: [{
-                                                            name: 'Number Employed',
-                                                            data: numData
-                                                        }]
-                                                    };
-                                                    // Create the bar chart
-                                                    new Highcharts.Chart(barChartOptions);
-                                                },
-                                                close: function () {
-                                                    // Clean up the chart container when the dialog is closed
-                                                    $('#dialog').empty();
-                                                }
-                                            });
-                                        }
-                                    })
+                                                            text: 'Number Employed'
+                                                        }
+                                                    },
+                                                    legend: {
+                                                        enabled: false
+                                                    },
+                                                    series: [{
+                                                        name: 'Number Employed',
+                                                        data: numData
+                                                    }]
+                                                };
+                                                // Create the bar chart
+                                                new Highcharts.Chart(barChartOptions);
+                                            },
+                                            close: function () {
+                                                // Clean up the chart container when the dialog is closed
+                                                $('#dialog').empty();
+                                            }
+                                        });
+                                    }
                                 }
                             }
                         }
