@@ -314,7 +314,6 @@ $.when(
                                     textContainer.appendChild(riskList);
                                     
                                     // Add the textContainer to the DOM
-                                    // document.getElementById('textContainer').innerHTML = '';
                                     document.getElementById('textContainer').appendChild(textContainer);
                                 },
                             }

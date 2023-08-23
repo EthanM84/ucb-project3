@@ -107,6 +107,8 @@ $.when(
     // Create a new array of occupations with 80%+ chance of automation
     let above80 = tableMergeClean.filter((row) => row['Probability'] >= 0.795);
     
+    console.log("Above80:", above80);
+    
     // Initialize an object to store the total employed by state AND top 10 at-risk occupations
     let stateSum = [];
     
@@ -124,12 +126,13 @@ $.when(
                     highRisk: []
                 };
                 
-                // Assemble double that includes top 10 occupations by probability
+                // Assemble triple that includes occupation, probability and state num
                 if (row[state] > 0) {
                     stateSum[state].sum += row[state];
                     stateSum[state].highRisk.push({
                         occupation: row['Occupation'],
-                        probability: row['Probability']
+                        probability: row['Probability'],
+                        num: row[state]
                     });
                 }
             }
@@ -190,7 +193,7 @@ $.when(
         'Wyoming': 'WY'
     };
 
-    // Create an array to hold plot data (key, stateSum, highest risk for automation per state)
+    // Create an array to hold plot data (key, state name & highest risk for automation per state)
     let stateData = [];
     for (let state in stateSum) {
         stateData.push({
@@ -212,102 +215,39 @@ $.when(
             sum: state.sum,
             highRisk: state.highRisk,
             value: state.sum,
-            drilldown: state.stateKey
         }));
         
         // Log mapData for verification
         console.log("Map Data:", mapData);
-                
-        let ddData = mapData.map(object => ({
-            id: object.drilldown,
-            ddName: object.stateName,
-            ddHighRisk: object.highRisk.map(item => [item.occupation, item.probability])
-        }));
-        
-        // Log ddData for verification
-        console.log("Drilldown Data:", ddData);
-        
-//         // Create a container for the text information
-//         let textContainer = document.getElementById('textContainer');
-//         document.body.appendChild(textContainer);
-                                      
+                                                            
         $.getJSON(
             'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json', function(data){buildChart(data);}
         );
         
         let topology = 'https://code.highcharts.com/mapdata/countries/us/us-all.topo.json';
-        
+                
         function buildChart(topology){                            
             // Initiate the map chart
             Highcharts.mapChart('container', {
-                drilldown: {
-                    series: ddData.map(item => ({
-                        id: item.id,
-                        name: item.ddName,
-                        data: item.ddHighRisk.map(highRiskItem => ({
-                            name: highRiskItem[0],
-                            y: highRiskItem[1] * 100
-                        }))
-                    })),
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.name}: {point.y:.2f}%'
-                    }
-                },
                 chart: {
                     map: topology,
-                    events: {
-                        drilldown: function (e) {
-                            // Add drilldown data and update the chart
-                            this.addSeriesAsDrilldown(e.point, e.seriesOptions);
-                            
-                            // Set the drilldown key and related data
-                            let point = e.point;
-                            let riskData = point.highRisk;
-                            
-                            console.log('ePoint', point);
-                            console.log('RiskData', riskData);
-                            
-                            // Display drilldown information
-                            let textContainer = document.getElementById('textContainer');
-                            
-                            // Clear the text container
-                            textContainer.innerHTML = '';
-                                                                                       
-                            // Drilldown title
-                            let title = document.createElement('h2');
-                            title.textContent = 'Top 10 Jobs Most at Risk from Automation in ' + point.ddName;
-                            textContainer.appendChild(title);
-
-                            // List highRisk jobs + probability of job loss
-                            let riskList = document.createElement('ul');
-                            riskData.forEach(function (item) {
-                                let occupation = item[0];
-                                let probability = item[1] * 100;
-
-                                let riskListItem = document.createElement('li');
-                                riskListItem.textContent = occupation + ': ' + probability.toFixed(2) + '%';
-                                riskList.appendChild(riskListItem);
-                            });
-                            textContainer.appendChild(riskList);
-                        },
-                    }
+                    marginTop: 150,
                 },
                 title: {
-                    text: 'Jobs Lost to Automation: >80% Confidence'
+                    text: 'Occupations At-Risk from Automation with >80% Confidence'
                 },
                 subtitle: {
-                    text: 'Source: U.S. Bureau of Labor Statistics & "The Future of Employment" (2013)'
+                    text: 'Sources: U.S. Bureau of Labor Statistics & "The Future of Employment" (2013)'
                 },
                 legend: {
                     layout: 'horizontal',
                     borderWidth: 0,
                     backgroundColor: 'rgba(255,255,255,0.85)',
                     floating: true,
-                    verticalAlign: 'bottom',
-                    y: 25,
+                    verticalAlign: 'top',
+                    y: 60,
                     title: {
-                        text: 'Anticipated Number of Jobs Lost per State',
+                        text: 'Projected Number of Jobs Lost',
                         style: {
                             color: (
                                 Highcharts.defaultOptions &&
@@ -344,12 +284,68 @@ $.when(
                                 color: '#FAF082'
                             }
                         }
+                    },
+                    series: {
+                        point: {
+                            events: {
+                                // Use JQuery UI to popup a bar chart when clicking on state
+                                click: function () {
+                                    let highRisk = this.highRisk;
+                                    console.log("this highRisk:", highRisk);
+                                    highRisk.forEach(function (item) {
+
+                                        if (highRisk) {
+                                            $('#dialog').dialog({
+                                                title: this.name,
+                                                width: 450,
+                                                height: 350,
+                                                open: function () {
+                                                    // Create a unique ID for the chart container
+                                                    let containerId = 'chartContainer' + this.abbrev;
+                                                    $('<div>').attr({
+                                                        id: containerId
+                                                    }).appendTo('#dialog');
+
+                                                    // Create the chart within the new container
+                                                    let barChartOptions = {
+                                                        chart: {
+                                                            renderTo: containerId,
+                                                            type: 'bar'
+                                                        },
+                                                        title: {
+                                                            text: 'Top 10 At-Risk Occupations'
+                                                        },
+                                                        xAxis: {
+                                                            categories: occupationData
+                                                        },
+                                                        yAxis: {
+                                                            title: {
+                                                                text: 'Number Employed'
+                                                            }
+                                                        },
+                                                        series: [{
+                                                            name: 'Number Employed',
+                                                            data: numData
+                                                        }]
+                                                    };
+                                                    // Create the bar chart
+                                                    new Highcharts.Chart(barChartOptions);
+                                                },
+                                                close: function () {
+                                                    // Clean up the chart container when the dialog is closed
+                                                    $('#dialog').empty();
+                                                }
+                                            });
+                                        }
+                                    })
+                                }
+                            }
+                        }
                     }
                 },
                 tooltip: {
                     backgroundColor: 'white',
                     borderWidth: 3,
-                    name: 'Jobs Lost to Automation',
                     formatter: function () {
                         return '<div style="padding: 10px;">' +
                             this.point.stateName + ': ' + this.point.sum +
@@ -379,4 +375,4 @@ $.when(
             })
         }
     });
-})
+});
