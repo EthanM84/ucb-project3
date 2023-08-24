@@ -12,6 +12,8 @@ The former provides current information pertaining to the number of people emplo
 
 For inclusion in the associated map, data was limited to those occupations which scored a probability of 80% or higher. The number associated with each state in the tooltip of the map is equivalent to the sum of all jobs per state within the filtered dataset.  A click event function was added to make additional information accessible for each state.  By clicking on the name, a bar chart is displayed in a popup.  This bar chart constitues the 10 occupations with the highest likelihood of being lost to automation within the next couple of decades along with the number of people currently employed with a matching job title.  Note:  Most of these have a probability rating of 98-99%.  
 
+P.S. Must use CORS unblocking when running the html file!!
+
 ---------------
 #### Allocation of Responsibilities:
 While this is considered a group project, the workload was compartmentalized and allocated to the four individuals assigned to Group 5.
