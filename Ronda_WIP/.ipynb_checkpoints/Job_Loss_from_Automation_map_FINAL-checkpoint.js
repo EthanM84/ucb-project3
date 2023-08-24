@@ -327,6 +327,14 @@ $.when(
                                                             text: 'Number Employed'
                                                         }
                                                     },
+                                                    plotOptions: {
+                                                        bar: {
+                                                            dataLabels: {
+                                                                enabled: true,
+                                                                format: '{y}'
+                                                            }
+                                                        }
+                                                    },
                                                     legend: {
                                                         enabled: false
                                                     },
