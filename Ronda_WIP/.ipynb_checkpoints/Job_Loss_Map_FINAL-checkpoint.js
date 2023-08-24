@@ -327,6 +327,22 @@ $.when(
                                                             text: 'Number Employed'
                                                         }
                                                     },
+                                                    plotOptions: {
+                                                        series: {
+                                                            // Add labels to data points
+                                                            dataLabels: {
+                                                                enabled: true,
+                                                                formatter: function() {
+                                                                    // Format the label text and remove the space after first digit
+                                                                    if (this.y > 999) {
+                                                                        return Highcharts.numberFormat(this.y, 0, '', '');
+                                                                    } else {
+                                                                        return this.y;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
                                                     legend: {
                                                         enabled: false
                                                     },
